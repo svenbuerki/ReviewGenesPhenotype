@@ -1,0 +1,378 @@
+---
+title: "Genes underpinning target phenotype"
+subtitle: "Stomatal anatomy"
+author: "Sven Buerki - Boise State University"
+date: "`r Sys.Date()`"
+output:
+#  bookdown::pdf_document2:
+#    toc: TRUE
+  bookdown::html_document2: 
+    toc: TRUE
+    toc_float: TRUE
+    self_contained: TRUE
+link-citations: yes
+fontsize: 12pt
+urlcolor: blue
+csl: AmJBot.csl
+bibliography: References.bib
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{js logo-js, echo=FALSE}
+$(document).ready(function() {
+  $('#header').parent().prepend('<div id=\"logo\"><img src=\"Images/boisestate-primarylogo-2color-rgb.png\" style=\"position:absolute; top:0; right:0; padding:10px; height:120px\"></div>');
+  $('#header').css('margin-right', '120px')
+});
+```
+
+```{r packages, echo=FALSE, warning=FALSE, include=FALSE}
+library(knitr)
+library(rmarkdown)
+library(bookdown)
+#library(distill)
+library(knitcitations)
+library(formatR)
+library(devtools)
+library(kfigr)
+library(dplyr)
+library(kableExtra)
+library(tufte)
+require(leaflet)
+library(tools)
+library(rentrez)
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install(c("DECIPHER", "Rgraphviz"))
+library(DECIPHER)
+library(Rgraphviz)
+library(annotate)
+library(igraph)
+library(DT)
+#if (!require(devtools)) install.packages("devtools")
+#devtools::install_github("yanlinlin82/ggvenn")
+library(ggvenn)
+#Generate BibTex citation file for all R packages used to produce report
+knitr::write_bib(.packages(), file = 'packages.bib')
+```
+
+# Identify genes controlling target phenotype
+
+- **Challenge:** Identifying all the genes controlling a target phenotype is challenging, but it is fundamental to our understanding of the contribution of genetics (vs. phenotypic plasticity) in explaining an organism's response to environmental changes.
+- **Solution:** Gene ontology (GO) terms and more specifically those associated to biological processes (BP) provide a framework to querying for specific phenotypes (here stomata). Once identified, GO terms can be extracted and graphed and their associated genes recovered for model species (here *Arabidopsis thaliana*; hereafter At).
+
+# Bioinformatic pipeline
+
+The R code presented below extract all genes associated to stomatal phenotype within biological processes by querying the org.At.tair.db and retrieving data on genes from the ENTREZ database on NCBI.
+
+## Dependencies and loading packages
+
+```{r echo = TRUE, eval = TRUE, message = FALSE, warning = FALSE}
+#Load packages
+library(org.At.tair.db)
+library(GOstats)
+library("GO.db")
+library(annotate)
+library(igraph)
+library(Rgraphviz)
+library(ggvenn)
+```
+
+## Annotate all GO terms in the org.At.tair.db 
+
+The `Terms` object will contain all the annotated GO terms. It is a list and it contains the biological processes
+
+```{r eval=TRUE, echo=TRUE, cache=T}
+##~~~
+# Get all GOTerms from the Arabidopsis db and annotate them
+##~~~
+#This list contains all the GOterms for ATH and the associated TAIR genes
+AllGoTermATHraw <- as.list(org.At.tairGO2TAIR)
+#This vector contains only the GOterms (no attributes)
+AllGoTermATH <- names(AllGoTermATHraw)
+
+#Annotate terms
+Terms <- annotate::getGOTerm(AllGoTermATH)
+
+#Print summary of annotated GO terms by category
+print(lengths(Terms))
+```
+
+## Query annotated GO terms for target phenotype
+
+Query annotated GO terms by specifically targeting the BP category. This will return the `keywordBP` object with GO terms matching the query. 
+
+```{r eval =TRUE, echo=TRUE, cache=TRUE}
+##~~
+# Query GOTerms for keyword and retrieve those matching
+##~~
+
+#Phenotype query 
+# Make this search wide to hit a max of GO terms (which could be manually inspected and reduced if needed)
+Phen <- "stomata"
+
+#Start search by using one keyword in Terms BP
+keywordBP <- Terms$BP[grep(Phen, Terms$BP)]
+
+#Print output
+print(keywordBP)
+```
+
+## Infer GO graph to infer relationships and identify missing GO terms
+
+Here we infer a GO graph to assess how the retrieved GO terms are related and also identify those that our query missed. We will also look at the org.At.tair.db to test whether the missing GO terms are recovered in this database.
+
+```{r eval=TRUE, echo=TRUE, cache=TRUE}
+##~~~
+# Infer GOgraph to isolate missing terms related to phenotype
+#   and update list of GOterms (incl. terms/definitions)
+##~~~
+#Infer GOgraph to identify children nodes important in pathways
+goGrkeyword <- GOstats::GOGraph(names(keywordBP), GOBPCHILDREN)
+
+#Which are the GO terms that we missed?
+GoTerms2Add <- match(setdiff(names(nodes(goGrkeyword)), names(keywordBP)), names(Terms$BP))
+
+#Check if some GOterms are not found in the Arabidopsis db and update GOTerms
+MissingGoTerm <- which(is.na(GoTerms2Add) == T)
+if(length(MissingGoTerm) > 0){
+  print(paste("GoTerms ", paste(names(nodes(goGrkeyword))[MissingGoTerm], collapse = ", "), " were not found in Arabidopsis db", sep = ""))
+  print("Updated query with new GOTerms")
+  keywordBP <- c(keywordBP, Terms$BP[GoTerms2Add[-MissingGoTerm]])
+}else{
+  print("Updated query with new GOTerms")
+  keywordBP <- c(keywordBP, Terms$BP[GoTerms2Add])
+}
+```
+
+## Establish number of biological pathways
+
+The GO graph seem to suggest that there are multiple biological pathways controlling our target phenotype. To test for this hypothesis we are decomposing the graph and identifying the root of each pathway. The output is saved in `GrpNodes` and it is a data.frame containing two columns. The first column represents the pathway ID (name of GO term at root of pathway), whereas the second contains the associated GO terms. 
+
+```{r pathways, eval = TRUE, echo = TRUE, cache = TRUE}
+##~~~
+# Establish number of biological pathways 
+# based on goGrkeyword (GOgraph)
+##~~~
+# Decompose Graph to identify number of subgroups/networks
+NGoGraph <- decompose.graph(graph_from_graphnel(goGrkeyword))
+
+# How many pathways are recovered?
+print(paste0("The number of pathways is estimated at: ", length(NGoGraph)))
+
+# How many BP are recovered per pathway?
+print(paste0("The number of BP per pathway are: ", paste(lengths(NGoGraph), collapse = ", ")))
+
+# Identify root of each pathway/subgraph
+GrpNodes <- matrix(ncol=2, nrow = 0)
+colnames(GrpNodes) <- c("BP_ID", "GOTerm")
+
+for(i in 1:length(NGoGraph)){
+  RootNodeTmp <- names(which(sapply(sapply(V(NGoGraph[[i]]), 
+    function(x) neighbors(NGoGraph[[i]],x, mode="in")), length) == 0))
+  RootNode <- cbind(rep(RootNodeTmp, length(NGoGraph[[i]])), names(V(NGoGraph[[i]])))
+  GrpNodes <- rbind(GrpNodes, RootNode)
+}
+GrpNodes <- as.data.frame(GrpNodes)
+
+#Print names of pathways
+print(keywordBP[match(unique(GrpNodes$BP_ID), names(keywordBP))])
+
+#Print output
+print("This table provides pathways and associated GO terms. The name of the pathway is the name of the GO term at root of the graph.")
+print(GrpNodes)
+```
+
+## Plot biological pathways
+
+Produce graph showing relationship between GO terms within previously identified biological pathways.
+
+```{r graph, dependson = 'pathways', echo=TRUE, eval=TRUE, cache=TRUE}
+##~~~
+# Plot GO graph
+##~~~
+#Establish list of root nodes to patways
+rootNodes <- unique(GrpNodes$BP_ID)
+
+#Color root node of pathway in red 
+nodes <- buildNodeList(goGrkeyword)
+nAttrs <- list()
+nAttrs$fillcolor <- ifelse(nodes(goGrkeyword) %in% rootNodes, "red", "white")
+names(nAttrs$fillcolor) <- nodes(goGrkeyword)
+nAttrs$label <- names(nodes(goGrkeyword)); names(nAttrs$label) <- names(nodes(goGrkeyword))
+
+#Plot graph
+pg <- plot(goGrkeyword, nodeAttrs = nAttrs)
+```
+
+## Extract TAIR and ENTREZ genes associated to target GO terms
+
+This part starts by extracting all TAIR gene IDs associated to GO terms in the updated `keywordBP` object. Then, it finds unique ENTREZ genes IDs, which are used to query the ENTREZ database and fetch additional data (`Evidence`, `Gene_Name`, `Gene_Definition`, `Gene_Aliases`). The whole data are saved in `OUT`. Due to the nature data were retrieved, it is possible that the same gene as multiple entries per GO term, since it might have been backed up by different evidence.
+
+```{r eval=TRUE, echo=TRUE, message = F, results='hide', cache=TRUE}
+##~~~
+# Extract all TAIRs genes associated to keywordBP (= GOTerms)
+##~~~
+keywordBPGO2TAIR <- AllGoTermATHraw[match(names(keywordBP), AllGoTermATH)]
+
+# TAIR to ENTREZ
+## Bimap interface:
+ENTREZID <- org.At.tairENTREZID
+# Get the ORF IDs that are mapped to an Entrez Gene ID
+mapped_genes <- mappedkeys(ENTREZID)
+# Convert to a list
+ENTREZIDlist <- as.list(ENTREZID[mapped_genes])
+
+##~~~
+# Create OUTput table to store gene information within each GOTerm
+#   also query ENTREZ db to fetch gene information
+##~~~
+#Infer lengths of each elements in keywordBPGO2TAIR 
+# This is useful to build OUT table
+SumDat <- lengths(keywordBPGO2TAIR)
+
+#Final output table
+OUT <- matrix(ncol = 9, nrow = sum(SumDat))
+colnames(OUT) <- c("BP_ID","GOTerm", "Term", "TAIR", "Evidence","ENTREZ", "Gene_Name", "Gene_Definition", "Gene_Aliases")
+OUT <- as.data.frame(OUT)
+OUT$GOTerm <- rep(names(SumDat), as.vector(SumDat))
+OUT$BP_ID <- GrpNodes$BP_ID[match(OUT$GOTerm, GrpNodes$GOTerm)]
+OUT$Term <- as.vector(keywordBP[match(OUT$GOTerm, names(keywordBP))])
+
+#List GOterms
+ListGOloop <- unique(OUT$GOTerm)
+for(i in 1:length(ListGOloop)){
+  #Rows to replace/update
+  ToUpdate <- which(OUT$GOTerm == ListGOloop[i])
+  
+  #Update TAIR
+  OUT$TAIR[ToUpdate] <- names(as.vector(ENTREZIDlist[match(keywordBPGO2TAIR[match(ListGOloop[i], names(keywordBPGO2TAIR))][[1]], names(ENTREZIDlist))]))
+  #Update Evidence
+  OUT$Evidence[ToUpdate] <- names(keywordBPGO2TAIR[match(ListGOloop[i], names(keywordBPGO2TAIR))][[1]])
+  #Update ENTREZID
+  OUT$ENTREZ[ToUpdate] <- as.vector(unlist(as.vector(ENTREZIDlist[match(keywordBPGO2TAIR[match(ListGOloop[i], names(keywordBPGO2TAIR))][[1]], names(ENTREZIDlist))])))
+
+}
+
+##~~~
+# Add Gene attributes from ENTREZ db
+##~~~
+
+#Set a progress bar
+print("Fetch Gene attributes from NCBI/ENTREZ db")
+pb <- txtProgressBar(min = 0, max = nrow(OUT), style = 3)
+for(i in 1:nrow(OUT)){
+  #Fetch gene data on NCBI/ENTREZ
+  NCBIfetch <- rentrez::entrez_fetch(db = "gene", id = as.vector(OUT$ENTREZ)[i], rettype = 'html', retmode = "text")
+  
+  #Split object
+  splitFetch <- strsplit(NCBIfetch, split = "\n")[[1]]
+  #Get Gene Name
+  OUT$Gene_Name[i] <- gsub("1. ", "", splitFetch[2])
+  #Get gene definition
+  OUT$Gene_Definition[i] <- splitFetch[3]
+  #Get Gene Aliases
+  OUT$Gene_Aliases[i] <- gsub("Other Aliases: ", "", splitFetch[grep("Other Aliases:", splitFetch)])
+  #update progress bar
+  setTxtProgressBar(pb, i)
+}
+close(pb)
+```
+
+## Write data out
+
+Before further inspecting the data, we will be writing it out in `csv` format together with an md5 companion file (to support reproducibility and versioning).
+
+```{r eval=TRUE, echo=TRUE, cache=TRUE}
+##~~~
+# Save output as csv and add a md5 companion file
+##~~~
+# Save CSV file
+fileCSV <- "Data/Literature_review/Review_GO_genes_stomatal_phenotype.csv"
+filemd5 <- gsub("[.]csv", "_md5.txt", fileCSV)
+write.csv(OUT, file = fileCSV, row.names = F, quote = T)
+
+# Save companion md5 file
+print(paste0("Write companion md5 file associated to ", fileCSV))
+#Infer md5
+md5CSV <- tools::md5sum(fileCSV)
+#Save file
+write.table(md5CSV, file = filemd5, row.names = T, col.names = F, quote = F)
+```
+
+## Stats on analyses
+
+```{r eval=TRUE, cache=TRUE}
+
+# Reduce dataset to only one occurrence per gene per pathway per GO term
+redOUT <- OUT[!duplicated(OUT[,c(1,2,4)]),]
+
+#How many genes are shared between the pathways?
+
+
+
+x <- list(
+  "GO:0010374" = subset(redOUT$Gene_Name, redOUT$BP_ID == unique(redOUT$BP_ID)[1]), 
+  "GO:0010118" = subset(redOUT$Gene_Name, redOUT$BP_ID == unique(redOUT$BP_ID)[2]), 
+  "GO:0010375" = subset(redOUT$Gene_Name, redOUT$BP_ID == unique(redOUT$BP_ID)[3])
+  )
+
+library(ggvenn)
+ggvenn(
+  x, 
+  fill_color = c("#0073C2FF", "#EFC000FF", "#868686FF"),
+  stroke_size = 0.5, set_name_size = 4
+  )
+```
+
+
+
+
+## Data visualization
+
+```{r lexicon, eval = T, echo=F, warning = FALSE, message=FALSE}
+###~~~
+#Read in csv 
+###~~~
+dat <- read.csv("Data/Literature_review/Review_GO_genes_stomatal_phenotype.csv") 
+
+###~~~
+#Produce final table
+###~~~
+
+#Order table (alphabetically)
+dat <- dat[order(dat$BP_ID),]
+rownames(dat) <- NULL
+###~~~
+#Plot in doc
+###~~~
+#Plot table
+DT::datatable(dat, extensions = 'Buttons', options = list(dom = 'Blfrtip', buttons = c('copy', 'csv', 'excel', 'pdf', 'print')), rownames= FALSE) %>%
+  DT::formatStyle('Term', fontWeight = 'bold')
+
+``` 
+
+```{r eval = F}
+
+
+
+
+
+
+
+
+
+
+#Plot GO graph
+queryNodes <- unique(OUT$GOTerm)
+goGrOUT <- GOstats::GOGraph(queryNodes, GOBPCHILDREN)
+
+nodes <- buildNodeList(goGrOUT)
+nAttrs <- list()
+nAttrs$fillcolor <- ifelse(nodes(goGrOUT) %in% queryNodes, "red", "white")
+names(nAttrs$fillcolor) <- nodes(goGrOUT)
+nAttrs$label <- names(nodes(goGrOUT)); names(nAttrs$label) <- names(nodes(goGrOUT))
+pg <- plot(goGrOUT, nodeAttrs = nAttrs)
+
+```
