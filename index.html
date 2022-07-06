@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Sven Buerki - Boise State University" />
+
+<meta name="date" content="2022-07-06" />
+
+<title>Genes underpinning target phenotype</title>
+
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/htmlwidgets-1.5.4/htmlwidgets.js"></script>
+<link href="site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="site_libs/datatables-binding-0.23/datatables.js"></script>
+<link href="site_libs/dt-core-1.11.3/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="site_libs/dt-core-1.11.3/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="site_libs/dt-core-1.11.3/js/jquery.dataTables.min.js"></script>
+<script src="site_libs/jszip-1.11.3/jszip.min.js"></script>
+<script src="site_libs/pdfmake-1.11.3/pdfmake.js"></script>
+<script src="site_libs/pdfmake-1.11.3/vfs_fonts.js"></script>
+<link href="site_libs/dt-ext-buttons-1.11.3/css/buttons.dataTables.min.css" rel="stylesheet" />
+<script src="site_libs/dt-ext-buttons-1.11.3/js/dataTables.buttons.min.js"></script>
+<script src="site_libs/dt-ext-buttons-1.11.3/js/buttons.html5.min.js"></script>
+<script src="site_libs/dt-ext-buttons-1.11.3/js/buttons.colVis.min.js"></script>
+<script src="site_libs/dt-ext-buttons-1.11.3/js/buttons.print.min.js"></script>
+<link href="site_libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+<style type="text/css">
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Review of Genes Underpinning a Phenotype</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Genes underpinning target phenotype</h1>
+<h3 class="subtitle">Stomatal anatomy</h3>
+<h4 class="author">Sven Buerki - Boise State University</h4>
+<h4 class="date">2022-07-06</h4>
+
+</div>
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+  $('#header').parent().prepend('<div id=\"logo\"><img src=\"Images/boisestate-primarylogo-2color-rgb.png\" style=\"position:absolute; top:0; right:0; padding:10px; height:120px\"></div>');
+  $('#header').css('margin-right', '120px')
+});
+</script>
+<div id="identify-genes-controlling-target-phenotype" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Identify genes controlling target phenotype</h1>
+<ul>
+<li><strong>Challenge:</strong> Identifying all the genes controlling a target phenotype is challenging, but it is fundamental to our understanding of the contribution of genetics (vs. phenotypic plasticity) in explaining an organism’s response to environmental changes.</li>
+<li><strong>Solution:</strong> Gene ontology (GO) terms <span class="citation">(<a href="#ref-Ashburner2000" role="doc-biblioref">Ashburner et al., 2000</a>; <a href="#ref-GOconso2020" role="doc-biblioref">Consortium, 2020</a>)</span> and more specifically those associated to biological processes (BP) provide a framework to querying for specific phenotypes (here stomata). Once identified, GO terms can be extracted and graphed and their associated genes recovered for model species (here <em>Arabidopsis thaliana</em>; hereafter At).</li>
+</ul>
+</div>
+<div id="bioinformatic-pipeline" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Bioinformatic pipeline</h1>
+<p>The R code presented below extract all genes associated to stomatal phenotype within biological processes by querying the org.At.tair.db and retrieving data on genes from the ENTREZ database on NCBI.</p>
+<div id="dependencies-and-loading-packages" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Dependencies and loading packages</h2>
+<pre class="r"><code>#Load packages
+library(org.At.tair.db)
+library(GOstats)
+library(&quot;GO.db&quot;)
+library(annotate)
+library(igraph)
+library(Rgraphviz)
+library(ggvenn)
+library(rentrez)</code></pre>
+</div>
+<div id="annotate-all-go-terms-in-the-org.at.tair.db" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> Annotate all GO terms in the org.At.tair.db</h2>
+<p>The <code>Terms</code> object will contain all the annotated GO terms. It is a list and it contains the biological processes</p>
+<pre class="r"><code>##~~~
+# Get all GOTerms from the Arabidopsis db and annotate them
+##~~~
+#This list contains all the GOterms for ATH and the associated TAIR genes
+AllGoTermATHraw &lt;- as.list(org.At.tairGO2TAIR)
+#This vector contains only the GOterms (no attributes)
+AllGoTermATH &lt;- names(AllGoTermATHraw)
+
+#Annotate terms
+Terms &lt;- annotate::getGOTerm(AllGoTermATH)
+
+#Print summary of annotated GO terms by category
+print(lengths(Terms))</code></pre>
+<pre><code>##   BP   CC   MF 
+## 4081  829 2762</code></pre>
+</div>
+<div id="query-annotated-go-terms-for-target-phenotype" class="section level2" number="2.3">
+<h2><span class="header-section-number">2.3</span> Query annotated GO terms for target phenotype</h2>
+<p>Query annotated GO terms by specifically targeting the BP category. This will return the <code>keywordBP</code> object with GO terms matching the query.</p>
+<pre class="r"><code>##~~
+# Query GOTerms for keyword and retrieve those matching
+##~~
+
+#Phenotype query 
+# Make this search wide to hit a max of GO terms (which could be manually inspected and reduced if needed)
+Phen &lt;- &quot;stomata&quot;
+
+#Start search by using one keyword in Terms BP
+keywordBP &lt;- Terms$BP[grep(Phen, Terms$BP)]
+
+#Print output
+print(keywordBP)</code></pre>
+<pre><code>##                                                                   GO:0010103 
+##                                             &quot;stomatal complex morphogenesis&quot; 
+##                                                                   GO:0010118 
+##                                                          &quot;stomatal movement&quot; 
+##                                                                   GO:0010119 
+##                                            &quot;regulation of stomatal movement&quot; 
+##                                                                   GO:0010374 
+##                                               &quot;stomatal complex development&quot; 
+##                                                                   GO:0010375 
+##                                                &quot;stomatal complex patterning&quot; 
+##                                                                   GO:0010376 
+##                                                 &quot;stomatal complex formation&quot; 
+##                                                                   GO:0010440 
+##                                               &quot;stomatal lineage progression&quot; 
+##                                                                   GO:0090332 
+##                                                           &quot;stomatal closure&quot; 
+##                                                                   GO:0090333 
+##                                             &quot;regulation of stomatal closure&quot; 
+##                                                                   GO:1901527 
+##    &quot;abscisic acid-activated signaling pathway involved in stomatal movement&quot; 
+##                                                                   GO:1901528 
+## &quot;hydrogen peroxide mediated signaling pathway involved in stomatal movement&quot; 
+##                                                                   GO:1902456 
+##                                             &quot;regulation of stomatal opening&quot; 
+##                                                                   GO:1902457 
+##                                    &quot;negative regulation of stomatal opening&quot; 
+##                                                                   GO:1902458 
+##                                    &quot;positive regulation of stomatal opening&quot; 
+##                                                                   GO:1990069 
+##                                                           &quot;stomatal opening&quot; 
+##                                                                   GO:2000037 
+##                                  &quot;regulation of stomatal complex patterning&quot; 
+##                                                                   GO:2000038 
+##                                 &quot;regulation of stomatal complex development&quot; 
+##                                                                   GO:2000122 
+##                        &quot;negative regulation of stomatal complex development&quot; 
+##                                                                   GO:2000123 
+##                        &quot;positive regulation of stomatal complex development&quot;</code></pre>
+</div>
+<div id="infer-go-graph-to-infer-relationships-and-identify-missing-go-terms" class="section level2" number="2.4">
+<h2><span class="header-section-number">2.4</span> Infer GO graph to infer relationships and identify missing GO terms</h2>
+<p>Here we infer a GO graph to assess how the retrieved GO terms are related and also identify those that our query missed. We will also look at the org.At.tair.db to test whether the missing GO terms are recovered in this database.</p>
+<pre class="r"><code>##~~~
+# Infer GOgraph to isolate missing terms related to phenotype
+#   and update list of GOterms (incl. terms/definitions)
+##~~~
+#Infer GOgraph to identify children nodes important in pathways
+goGrkeyword &lt;- GOstats::GOGraph(names(keywordBP), GOBPCHILDREN)
+
+#Which are the GO terms that we missed?
+GoTerms2Add &lt;- match(setdiff(names(nodes(goGrkeyword)), names(keywordBP)), names(Terms$BP))
+
+#Check if some GOterms are not found in the Arabidopsis db and update GOTerms
+MissingGoTerm &lt;- which(is.na(GoTerms2Add) == T)
+if(length(MissingGoTerm) &gt; 0){
+  print(paste(&quot;GoTerms &quot;, paste(names(nodes(goGrkeyword))[MissingGoTerm], collapse = &quot;, &quot;), &quot; were not found in Arabidopsis db&quot;, sep = &quot;&quot;))
+  print(&quot;Updated query with new GOTerms&quot;)
+  keywordBP &lt;- c(keywordBP, Terms$BP[GoTerms2Add[-MissingGoTerm]])
+}else{
+  print(&quot;Updated query with new GOTerms&quot;)
+  keywordBP &lt;- c(keywordBP, Terms$BP[GoTerms2Add])
+}</code></pre>
+<pre><code>## [1] &quot;GoTerms GO:0010119, GO:0010375 were not found in Arabidopsis db&quot;
+## [1] &quot;Updated query with new GOTerms&quot;</code></pre>
+</div>
+<div id="establish-number-of-biological-pathways" class="section level2" number="2.5">
+<h2><span class="header-section-number">2.5</span> Establish number of biological pathways</h2>
+<p>The GO graph seem to suggest that there are multiple biological pathways controlling our target phenotype. To test for this hypothesis we are decomposing the graph and identifying the root of each pathway. The output is saved in <code>GrpNodes</code> and it is a data.frame containing two columns. The first column represents the pathway ID (name of GO term at root of pathway), whereas the second contains the associated GO terms.</p>
+<pre class="r"><code>##~~~
+# Establish number of biological pathways 
+# based on goGrkeyword (GOgraph)
+##~~~
+# Decompose Graph to identify number of subgroups/networks
+NGoGraph &lt;- decompose.graph(graph_from_graphnel(goGrkeyword))
+
+# How many pathways are recovered?
+print(paste0(&quot;The number of pathways is estimated at: &quot;, length(NGoGraph)))</code></pre>
+<pre><code>## [1] &quot;The number of pathways is estimated at: 3&quot;</code></pre>
+<pre class="r"><code># How many BP are recovered per pathway?
+print(paste0(&quot;The number of BP per pathway are: &quot;, paste(lengths(NGoGraph), collapse = &quot;, &quot;)))</code></pre>
+<pre><code>## [1] &quot;The number of BP per pathway are: 14, 11, 2&quot;</code></pre>
+<pre class="r"><code># Identify root of each pathway/subgraph
+GrpNodes &lt;- matrix(ncol=2, nrow = 0)
+colnames(GrpNodes) &lt;- c(&quot;BP_ID&quot;, &quot;GOTerm&quot;)
+
+for(i in 1:length(NGoGraph)){
+  RootNodeTmp &lt;- names(which(sapply(sapply(V(NGoGraph[[i]]), 
+    function(x) neighbors(NGoGraph[[i]],x, mode=&quot;in&quot;)), length) == 0))
+  RootNode &lt;- cbind(rep(RootNodeTmp, length(NGoGraph[[i]])), names(V(NGoGraph[[i]])))
+  GrpNodes &lt;- rbind(GrpNodes, RootNode)
+}
+GrpNodes &lt;- as.data.frame(GrpNodes)
+
+#Print names of pathways
+print(keywordBP[match(unique(GrpNodes$BP_ID), names(keywordBP))])</code></pre>
+<pre><code>##                     GO:0010374                     GO:0010118 
+## &quot;stomatal complex development&quot;            &quot;stomatal movement&quot; 
+##                     GO:0010375 
+##  &quot;stomatal complex patterning&quot;</code></pre>
+<pre class="r"><code>#Print output
+print(&quot;This table provides pathways and associated GO terms. The name of the pathway is the name of the GO term at root of the graph.&quot;)</code></pre>
+<pre><code>## [1] &quot;This table provides pathways and associated GO terms. The name of the pathway is the name of the GO term at root of the graph.&quot;</code></pre>
+<pre class="r"><code>print(GrpNodes)</code></pre>
+<pre><code>##         BP_ID     GOTerm
+## 1  GO:0010374 GO:0010103
+## 2  GO:0010374 GO:0010374
+## 3  GO:0010374 GO:0010376
+## 4  GO:0010374 GO:0010440
+## 5  GO:0010374 GO:2000038
+## 6  GO:0010374 GO:2000122
+## 7  GO:0010374 GO:2000123
+## 8  GO:0010374 GO:0010052
+## 9  GO:0010374 GO:0010235
+## 10 GO:0010374 GO:0010443
+## 11 GO:0010374 GO:0010444
+## 12 GO:0010374 GO:0010377
+## 13 GO:0010374 GO:0010441
+## 14 GO:0010374 GO:0010442
+## 15 GO:0010118 GO:0010118
+## 16 GO:0010118 GO:0010119
+## 17 GO:0010118 GO:0090332
+## 18 GO:0010118 GO:0090333
+## 19 GO:0010118 GO:1901527
+## 20 GO:0010118 GO:1901528
+## 21 GO:0010118 GO:1902456
+## 22 GO:0010118 GO:1902457
+## 23 GO:0010118 GO:1902458
+## 24 GO:0010118 GO:1990069
+## 25 GO:0010118 GO:1905588
+## 26 GO:0010375 GO:0010375
+## 27 GO:0010375 GO:2000037</code></pre>
+</div>
+<div id="plot-biological-pathways" class="section level2" number="2.6">
+<h2><span class="header-section-number">2.6</span> Plot biological pathways</h2>
+<p>Produce graph showing relationship between GO terms within previously identified biological pathways.</p>
+<pre class="r"><code>##~~~
+# Plot GO graph
+##~~~
+#Establish list of root nodes to patways
+rootNodes &lt;- unique(GrpNodes$BP_ID)
+
+#Color root node of pathway in red 
+nodes &lt;- buildNodeList(goGrkeyword)
+nAttrs &lt;- list()
+nAttrs$fillcolor &lt;- ifelse(nodes(goGrkeyword) %in% rootNodes, &quot;red&quot;, &quot;white&quot;)
+names(nAttrs$fillcolor) &lt;- nodes(goGrkeyword)
+nAttrs$label &lt;- names(nodes(goGrkeyword)); names(nAttrs$label) &lt;- names(nodes(goGrkeyword))
+
+#Plot graph
+pg &lt;- plot(goGrkeyword, nodeAttrs = nAttrs)</code></pre>
+<p><img src="index_files/figure-html/graph-1.png" width="672" /></p>
+</div>
+<div id="extract-tair-and-entrez-genes-associated-to-target-go-terms" class="section level2" number="2.7">
+<h2><span class="header-section-number">2.7</span> Extract TAIR and ENTREZ genes associated to target GO terms</h2>
+<p>This part starts by extracting all TAIR gene IDs associated to GO terms in the updated <code>keywordBP</code> object. Then, it finds unique ENTREZ genes IDs, which are used to query the ENTREZ database and fetch additional data (<code>Evidence</code>, <code>Gene_Name</code>, <code>Gene_Definition</code>, <code>Gene_Aliases</code>). The whole data are saved in <code>OUT</code>. Due to the nature data were retrieved, it is possible that the same gene as multiple entries per GO term, since it might have been backed up by different evidence.</p>
+<pre class="r"><code>##~~~
+# Extract all TAIRs genes associated to keywordBP (= GOTerms)
+##~~~
+keywordBPGO2TAIR &lt;- AllGoTermATHraw[match(names(keywordBP), AllGoTermATH)]
+
+# TAIR to ENTREZ
+## Bimap interface:
+ENTREZID &lt;- org.At.tairENTREZID
+# Get the ORF IDs that are mapped to an Entrez Gene ID
+mapped_genes &lt;- mappedkeys(ENTREZID)
+# Convert to a list
+ENTREZIDlist &lt;- as.list(ENTREZID[mapped_genes])
+
+##~~~
+# Create OUTput table to store gene information within each GOTerm
+#   also query ENTREZ db to fetch gene information
+##~~~
+#Infer lengths of each elements in keywordBPGO2TAIR 
+# This is useful to build OUT table
+SumDat &lt;- lengths(keywordBPGO2TAIR)
+
+#Final output table
+OUT &lt;- matrix(ncol = 9, nrow = sum(SumDat))
+colnames(OUT) &lt;- c(&quot;BP_ID&quot;,&quot;GOTerm&quot;, &quot;Term&quot;, &quot;TAIR&quot;, &quot;Evidence&quot;,&quot;ENTREZ&quot;, &quot;Gene_Name&quot;, &quot;Gene_Definition&quot;, &quot;Gene_Aliases&quot;)
+OUT &lt;- as.data.frame(OUT)
+OUT$GOTerm &lt;- rep(names(SumDat), as.vector(SumDat))
+OUT$BP_ID &lt;- GrpNodes$BP_ID[match(OUT$GOTerm, GrpNodes$GOTerm)]
+OUT$Term &lt;- as.vector(keywordBP[match(OUT$GOTerm, names(keywordBP))])
+
+#List GOterms
+ListGOloop &lt;- unique(OUT$GOTerm)
+for(i in 1:length(ListGOloop)){
+  #Rows to replace/update
+  ToUpdate &lt;- which(OUT$GOTerm == ListGOloop[i])
+  
+  #Update TAIR
+  OUT$TAIR[ToUpdate] &lt;- names(as.vector(ENTREZIDlist[match(keywordBPGO2TAIR[match(ListGOloop[i], names(keywordBPGO2TAIR))][[1]], names(ENTREZIDlist))]))
+  #Update Evidence
+  OUT$Evidence[ToUpdate] &lt;- names(keywordBPGO2TAIR[match(ListGOloop[i], names(keywordBPGO2TAIR))][[1]])
+  #Update ENTREZID
+  OUT$ENTREZ[ToUpdate] &lt;- as.vector(unlist(as.vector(ENTREZIDlist[match(keywordBPGO2TAIR[match(ListGOloop[i], names(keywordBPGO2TAIR))][[1]], names(ENTREZIDlist))])))
+
+}
+
+##~~~
+# Add Gene attributes from ENTREZ db
+##~~~
+
+#Set a progress bar
+print(&quot;Fetch Gene attributes from NCBI/ENTREZ db&quot;)
+pb &lt;- txtProgressBar(min = 0, max = nrow(OUT), style = 3)
+for(i in 1:nrow(OUT)){
+  #Fetch gene data on NCBI/ENTREZ
+  NCBIfetch &lt;- rentrez::entrez_fetch(db = &quot;gene&quot;, id = as.vector(OUT$ENTREZ)[i], rettype = &#39;html&#39;, retmode = &quot;text&quot;)
+  
+  #Split object
+  splitFetch &lt;- strsplit(NCBIfetch, split = &quot;\n&quot;)[[1]]
+  #Get Gene Name
+  OUT$Gene_Name[i] &lt;- gsub(&quot;1. &quot;, &quot;&quot;, splitFetch[2])
+  #Get gene definition
+  OUT$Gene_Definition[i] &lt;- splitFetch[3]
+  #Get Gene Aliases
+  OUT$Gene_Aliases[i] &lt;- gsub(&quot;Other Aliases: &quot;, &quot;&quot;, splitFetch[grep(&quot;Other Aliases:&quot;, splitFetch)])
+  #update progress bar
+  setTxtProgressBar(pb, i)
+}
+close(pb)</code></pre>
+</div>
+<div id="write-data-out" class="section level2" number="2.8">
+<h2><span class="header-section-number">2.8</span> Write data out</h2>
+<p>Before further inspecting the data, we will be writing it out in <code>csv</code> format together with an md5 companion file (to support reproducibility and versioning).</p>
+<pre class="r"><code>##~~~
+# Save output as csv and add a md5 companion file
+##~~~
+# Save CSV file
+fileCSV &lt;- &quot;Data/Literature_review/Review_GO_genes_stomatal_phenotype.csv&quot;
+filemd5 &lt;- gsub(&quot;[.]csv&quot;, &quot;_md5.txt&quot;, fileCSV)
+write.csv(OUT, file = fileCSV, row.names = F, quote = T)
+
+# Save companion md5 file
+print(paste0(&quot;Write companion md5 file associated to &quot;, fileCSV))</code></pre>
+<pre><code>## [1] &quot;Write companion md5 file associated to Data/Literature_review/Review_GO_genes_stomatal_phenotype.csv&quot;</code></pre>
+<pre class="r"><code>#Infer md5
+md5CSV &lt;- tools::md5sum(fileCSV)
+#Save file
+write.table(md5CSV, file = filemd5, row.names = T, col.names = F, quote = F)</code></pre>
+</div>
+</div>
+<div id="summarizing-data" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Summarizing data</h1>
+<div id="stats-on-analyses" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> Stats on analyses</h2>
+<pre class="r"><code># Reduce dataset to only one occurrence per gene per pathway per GO term
+redOUT &lt;- OUT[!duplicated(OUT[,c(1,2,4)]),]
+
+#How many genes are shared between the pathways?
+
+
+
+x &lt;- list(
+  &quot;GO:0010374&quot; = subset(redOUT$Gene_Name, redOUT$BP_ID == unique(redOUT$BP_ID)[1]), 
+  &quot;GO:0010118&quot; = subset(redOUT$Gene_Name, redOUT$BP_ID == unique(redOUT$BP_ID)[2]), 
+  &quot;GO:0010375&quot; = subset(redOUT$Gene_Name, redOUT$BP_ID == unique(redOUT$BP_ID)[3])
+  )
+
+library(ggvenn)
+ggvenn(
+  x, 
+  fill_color = c(&quot;#0073C2FF&quot;, &quot;#EFC000FF&quot;, &quot;#868686FF&quot;),
+  stroke_size = 0.5, set_name_size = 4
+  )</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+<div id="data-visualization" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> Data visualization</h2>
+<div id="htmlwidget-07949586a07fb744b797" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-07949586a07fb744b797">{"x":{"filter":"none","vertical":false,"extensions":["Buttons"],"data":[["GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375"],["GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010118","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0010119","GO:0090332","GO:0090332","GO:0090332","GO:0090332","GO:0090332","GO:0090332","GO:0090332","GO:0090332","GO:0090332","GO:0090332","GO:0090332","GO:0090332","GO:0090332","GO:0090332","GO:0090332","GO:0090332","GO:0090332","GO:0090332","GO:0090332","GO:0090332","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:0090333","GO:1901527","GO:1901527","GO:1901527","GO:1901527","GO:1901527","GO:1901527","GO:1901527","GO:1901528","GO:1901528","GO:1902456","GO:1902456","GO:1902456","GO:1902456","GO:1902456","GO:1902456","GO:1902456","GO:1902456","GO:1902456","GO:1902456","GO:1902457","GO:1902457","GO:1902457","GO:1902457","GO:1902458","GO:1902458","GO:1902458","GO:1990069","GO:1990069","GO:1990069","GO:1990069","GO:0010103","GO:0010103","GO:0010103","GO:0010103","GO:0010103","GO:0010103","GO:0010103","GO:0010103","GO:0010103","GO:0010103","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010374","GO:0010376","GO:0010376","GO:0010376","GO:0010376","GO:0010376","GO:0010376","GO:0010376","GO:0010440","GO:0010440","GO:0010440","GO:0010440","GO:0010440","GO:0010440","GO:0010440","GO:2000038","GO:2000038","GO:2000038","GO:2000038","GO:2000038","GO:2000038","GO:2000038","GO:2000038","GO:2000122","GO:2000122","GO:2000122","GO:2000122","GO:2000122","GO:2000122","GO:2000122","GO:2000122","GO:2000123","GO:2000123","GO:2000123","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010052","GO:0010235","GO:0010235","GO:0010235","GO:0010235","GO:0010235","GO:0010444","GO:0010444","GO:0010444","GO:0010444","GO:0010444","GO:0010444","GO:0010444","GO:0010444","GO:0010444","GO:0010444","GO:0010444","GO:0010377","GO:0010377","GO:0010441","GO:0010442","GO:0010442","GO:0010442","GO:0010442","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:0010375","GO:2000037","GO:2000037","GO:2000037","GO:2000037","GO:2000037","GO:2000037","GO:2000037","GO:2000037","GO:2000037","GO:2000037","GO:2000037"],["stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","regulation of stomatal movement","stomatal closure","stomatal closure","stomatal closure","stomatal closure","stomatal closure","stomatal closure","stomatal closure","stomatal closure","stomatal closure","stomatal closure","stomatal closure","stomatal closure","stomatal closure","stomatal closure","stomatal closure","stomatal closure","stomatal closure","stomatal closure","stomatal closure","stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","regulation of stomatal closure","abscisic acid-activated signaling pathway involved in stomatal movement","abscisic acid-activated signaling pathway involved in stomatal movement","abscisic acid-activated signaling pathway involved in stomatal movement","abscisic acid-activated signaling pathway involved in stomatal movement","abscisic acid-activated signaling pathway involved in stomatal movement","abscisic acid-activated signaling pathway involved in stomatal movement","abscisic acid-activated signaling pathway involved in stomatal movement","hydrogen peroxide mediated signaling pathway involved in stomatal movement","hydrogen peroxide mediated signaling pathway involved in stomatal movement","regulation of stomatal opening","regulation of stomatal opening","regulation of stomatal opening","regulation of stomatal opening","regulation of stomatal opening","regulation of stomatal opening","regulation of stomatal opening","regulation of stomatal opening","regulation of stomatal opening","regulation of stomatal opening","negative regulation of stomatal opening","negative regulation of stomatal opening","negative regulation of stomatal opening","negative regulation of stomatal opening","positive regulation of stomatal opening","positive regulation of stomatal opening","positive regulation of stomatal opening","stomatal opening","stomatal opening","stomatal opening","stomatal opening","stomatal complex morphogenesis","stomatal complex morphogenesis","stomatal complex morphogenesis","stomatal complex morphogenesis","stomatal complex morphogenesis","stomatal complex morphogenesis","stomatal complex morphogenesis","stomatal complex morphogenesis","stomatal complex morphogenesis","stomatal complex morphogenesis","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex development","stomatal complex formation","stomatal complex formation","stomatal complex formation","stomatal complex formation","stomatal complex formation","stomatal complex formation","stomatal complex formation","stomatal lineage progression","stomatal lineage progression","stomatal lineage progression","stomatal lineage progression","stomatal lineage progression","stomatal lineage progression","stomatal lineage progression","regulation of stomatal complex development","regulation of stomatal complex development","regulation of stomatal complex development","regulation of stomatal complex development","regulation of stomatal complex development","regulation of stomatal complex development","regulation of stomatal complex development","regulation of stomatal complex development","negative regulation of stomatal complex development","negative regulation of stomatal complex development","negative regulation of stomatal complex development","negative regulation of stomatal complex development","negative regulation of stomatal complex development","negative regulation of stomatal complex development","negative regulation of stomatal complex development","negative regulation of stomatal complex development","positive regulation of stomatal complex development","positive regulation of stomatal complex development","positive regulation of stomatal complex development","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard cell differentiation","guard mother cell cytokinesis","guard mother cell cytokinesis","guard mother cell cytokinesis","guard mother cell cytokinesis","guard mother cell cytokinesis","guard mother cell differentiation","guard mother cell differentiation","guard mother cell differentiation","guard mother cell differentiation","guard mother cell differentiation","guard mother cell differentiation","guard mother cell differentiation","guard mother cell differentiation","guard mother cell differentiation","guard mother cell differentiation","guard mother cell differentiation","guard cell fate commitment","guard cell fate commitment","guard cell development","guard cell morphogenesis","guard cell morphogenesis","guard cell morphogenesis","guard cell morphogenesis","stomatal complex patterning","stomatal complex patterning","stomatal complex patterning","stomatal complex patterning","stomatal complex patterning","stomatal complex patterning","stomatal complex patterning","stomatal complex patterning","stomatal complex patterning","stomatal complex patterning","stomatal complex patterning","stomatal complex patterning","regulation of stomatal complex patterning","regulation of stomatal complex patterning","regulation of stomatal complex patterning","regulation of stomatal complex patterning","regulation of stomatal complex patterning","regulation of stomatal complex patterning","regulation of stomatal complex patterning","regulation of stomatal complex patterning","regulation of stomatal complex patterning","regulation of stomatal complex patterning","regulation of stomatal complex patterning"],["AT1G04400","AT1G08810","AT1G09780","AT1G10300","AT1G11960","AT1G12480","AT1G16540","AT1G30270","AT1G32080","AT1G74710","AT2G17260","AT2G31470","AT2G33380","AT2G39940","AT2G47800","AT3G08590","AT3G11130","AT3G51550","AT3G56960","AT4G08920","AT4G08920","AT4G12290","AT4G17615","AT4G17970","AT4G18290","AT4G24020","AT4G32150","AT4G33950","AT4G34460","AT5G04310","AT5G06970","AT5G11270","AT5G46220","AT5G46860","AT5G47100","AT5G58140","AT5G58140","AT5G59220","AT5G65590","AT1G05805","AT1G09540","AT1G09540","AT1G10560","AT1G15440","AT1G20090","AT1G25490","AT1G30270","AT1G51140","AT1G51850","AT1G52400","AT1G57560","AT1G62400","AT1G62400","AT1G64060","AT1G65480","AT1G66340","AT1G69530","AT1G69850","AT1G70410","AT1G75380","AT2G17290","AT2G18960","AT2G19690","AT2G21660","AT2G25930","AT2G26300","AT2G26300","AT2G26670","AT2G26770","AT2G31470","AT2G32950","AT2G32950","AT2G39660","AT2G40220","AT2G40820","AT2G46070","AT2G46370","AT3G01500","AT3G11410","AT3G11820","AT3G15730","AT3G45780","AT3G49220","AT3G51780","AT3G56480","AT4G01370","AT4G01680","AT4G03560","AT4G04740","AT4G04740","AT4G16110","AT4G18950","AT4G23650","AT4G26080","AT4G33050","AT4G33950","AT4G40100","AT5G03280","AT5G20090","AT5G23720","AT5G25980","AT5G26000","AT5G26660","AT5G27620","AT5G44790","AT5G54270","AT5G55630","AT1G08860","AT1G12480","AT1G12480","AT1G15520","AT1G25480","AT1G62580","AT1G71010","AT2G31870","AT2G39050","AT2G41070","AT3G14270","AT3G58490","AT4G20260","AT4G29130","AT5G02500","AT5G02800","AT5G43410","AT5G48650","AT5G56030","AT5G64010","AT1G07000","AT1G12480","AT1G23030","AT1G47128","AT1G62400","AT2G05070","AT2G05100","AT2G26300","AT2G26650","AT2G31650","AT2G40750","AT2G43790","AT2G46070","AT3G05010","AT3G05030","AT3G05030","AT3G16640","AT3G21220","AT3G27690","AT3G49260","AT3G50310","AT3G56400","AT3G59700","AT3G59780","AT4G01370","AT4G20940","AT4G22330","AT4G33950","AT4G35790","AT5G10720","AT5G13740","AT5G13750","AT5G13750","AT5G23060","AT5G23060","AT5G27150","AT5G27150","AT5G49760","AT5G58430","AT1G04120","AT1G55660","AT3G09770","AT3G46060","AT3G50360","AT4G20940","AT5G05860","AT4G20940","AT5G49760","AT1G12480","AT2G17290","AT4G14480","AT4G22790","AT4G22790","AT4G33950","AT5G22920","AT5G22920","AT5G46220","AT5G57050","AT1G05100","AT1G17280","AT3G17000","AT5G50430","AT2G20890","AT2G28930","AT5G52440","AT1G04120","AT2G18960","AT5G27620","AT5G40280","AT1G04110","AT1G63700","AT1G75640","AT1G80080","AT2G26330","AT3G61650","AT3G63440","AT5G05620","AT5G07180","AT5G62230","AT1G09470","AT1G32640","AT1G34245","AT1G67040","AT1G71866","AT1G80133","AT1G80370","AT2G05760","AT2G15430","AT2G16630","AT2G18790","AT2G20875","AT2G30370","AT2G38160","AT2G42610","AT3G02120","AT3G06120","AT3G06120","AT3G07320","AT3G20940","AT3G22820","AT3G24140","AT3G44960","AT3G52110","AT3G61610","AT4G12540","AT4G12970","AT4G14723","AT4G17880","AT4G36180","AT4G37810","AT5G01910","AT5G10310","AT5G46760","AT5G53210","AT5G53210","AT5G60880","AT5G62710","AT5G66230","AT1G14350","AT1G14350","AT1G80080","AT2G02820","AT2G46410","AT3G54180","AT3G54180","AT2G40180","AT3G22760","AT3G26744","AT3G57230","AT4G14770","AT5G10440","AT5G65420","AT1G05100","AT1G20160","AT1G33240","AT1G51660","AT2G43790","AT3G45640","AT4G12970","AT5G53210","AT1G20160","AT1G25250","AT1G34245","AT1G70410","AT2G20875","AT2G30370","AT2G30370","AT3G01500","AT1G15570","AT4G12970","AT5G11300","AT1G14350","AT1G14350","AT1G34245","AT1G34245","AT1G71866","AT1G71866","AT1G80133","AT1G80133","AT2G02820","AT2G20875","AT2G30370","AT2G30370","AT3G06120","AT3G13898","AT3G22820","AT3G22820","AT3G24140","AT3G24140","AT4G12970","AT4G14723","AT4G14723","AT4G37810","AT4G37810","AT5G10310","AT5G10310","AT5G53210","AT5G65590","AT1G14350","AT1G49040","AT2G02820","AT3G22780","AT3G48750","AT1G12860","AT1G14350","AT1G15570","AT2G02820","AT2G38620","AT3G24140","AT3G48750","AT3G50070","AT3G54180","AT4G34160","AT5G67260","AT3G12280","AT3G24140","AT1G27695","AT1G18580","AT2G20810","AT4G26690","AT5G55480","AT1G08750","AT1G80080","AT1G80180","AT2G15430","AT2G17820","AT2G20875","AT3G22760","AT3G59350","AT4G12970","AT4G12970","AT4G14770","AT5G08120","AT1G14350","AT1G33240","AT1G51660","AT2G02820","AT2G02820","AT2G38620","AT2G43790","AT3G21220","AT3G45640","AT3G54180","AT5G05660"],["IGI","IMP","IGI","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IGI","IMP","IGI","IMP","IMP","IGI","IMP","IGI","IMP","IMP","IMP","IMP","IMP","IGI","IMP","IMP","IMP","IMP","IMP","IGI","IGI","IMP","IMP","IMP","IDA","IBA","IMP","IMP","IMP","IMP","IMP","IMP","IDA","IMP","IMP","IBA","IMP","IDA","IMP","IMP","IMP","IMP","IMP","IGI","IMP","IMP","IMP","IMP","IMP","IMP","IMP","TAS","IGI","IMP","IMP","IMP","IGI","IGI","IGI","IEA","IMP","IMP","IGI","IMP","IMP","IMP","IMP","IMP","IGI","IEA","IMP","IBA","IMP","NAS","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IBA","IMP","IMP","IMP","IMP","IMP","IMP","IBA","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","ISS","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IBA","IGI","IMP","IMP","ISS","IMP","IMP","IMP","IMP","IEA","IMP","IMP","IMP","IMP","IMP","IMP","IBA","IMP","IBA","IEA","IMP","IBA","IGI","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IGI","IMP","IMP","IMP","IGI","IMP","IMP","IMP","IGI","IGI","IGI","IMP","IMP","IMP","IGI","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","TAS","IMP","IGI","IGI","IEA","IGI","IMP","IEA","ISS","ISS","IGI","IEA","IMP","IMP","IMP","IGI","ISS","IEA","IEA","IEA","IBA","IMP","IEA","IEA","IMP","IBA","IEA","IEA","IEA","IEA","ISS","IMP","IGI","IEA","ISS","IEA","ISS","IGI","IBA","IMP","IMP","IEA","IEA","IMP","IEP","IMP","IMP","IMP","IEP","TAS","IMP","IGI","IMP","IMP","IGI","IMP","IMP","IMP","IMP","IMP","IGI","IGI","IGI","IMP","IMP","IMP","IMP","IMP","IGI","IMP","IGI","IMP","IGI","IGI","IDA","IGI","NAS","IGI","IMP","IBA","ISS","IBA","ISS","IBA","IGI","IBA","ISS","IBA","IEA","IBA","IBA","IMP","IMP","IEA","ISS","IMP","IBA","IBA","ISS","IBA","ISS","IEA","IMP","IMP","IMP","IMP","IGI","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IMP","IGI","IGI","IMP","IGI","IGI","IGI","IGI","IMP","IMP","IMP","IMP","IMP","IMP","IGI","IGI","IDA","IMP","IGI","IMP","IMP","IMP","IGI","IMP","IGI","IMP","IGI","IGI","IGI","IMP","IMP"],[839529,837403,837507,837569,837748,837805,838224,839907,840100,843810,816231,817705,817901,818581,819392,820006,820284,824318,824863,826470,826470,826838,827481,827522,827555,828502,829347,829541,829597,830310,830588,830997,834664,834730,834756,835926,835926,836040,836685,837090,837480,837480,837597,838115,838598,839135,839907,841537,841612,841670,842131,842538,842538,842710,842859,842951,843288,843321,843377,843874,816235,816413,816488,816705,817134,817170,817170,817208,817218,817705,817857,817857,818549,818614,818679,819215,819244,821134,820314,820355,820816,823721,824083,824341,824815,828151,826853,825655,825809,825809,827297,827630,828465,828714,829442,829541,830173,831889,832131,832437,832667,832669,832723,832824,834509,835515,835657,837408,837805,837805,838122,839134,842555,843440,817745,818491,818706,820647,825018,827773,829034,831020,831285,834360,834922,835701,836522,837210,837805,838911,841122,842538,815055,815058,817170,817206,817721,818670,818982,819215,819662,819665,819665,820916,821676,822391,824087,824193,824807,825139,825147,828151,827842,828328,829541,829733,830938,831219,831220,831220,832370,832370,832773,832773,835039,835956,839277,842015,820135,823749,824198,827842,830471,827842,835039,837805,816235,827095,828378,828378,829541,832356,832356,834664,835809,839324,838300,820956,835111,816623,817442,835320,839277,816413,832824,834026,839287,842674,843899,844348,817173,825338,825519,830445,830609,836344,837470,840158,840324,843024,10723086,5007859,844377,815127,816035,816164,816394,816621,817587,818394,818861,821311,819785,819785,819920,821644,821853,822000,823631,824374,825334,826866,826909,3769880,827511,829775,829937,831775,830895,834719,835402,835402,836209,836392,836755,837997,837997,844348,814812,819249,824585,824585,818609,821847,822287,824890,827132,830908,836667,839324,838606,840218,841591,818982,823706,826909,835402,838606,839108,840324,843377,816621,817587,817587,821134,838127,826909,831001,837997,837997,840324,840324,10723086,10723086,5007859,5007859,814812,816621,817587,817587,819785,10723043,821853,821853,822000,822000,826909,3769880,3769880,829937,829937,830895,830895,835402,836685,837997,841327,814812,821849,824036,837843,837997,838127,814812,818444,822000,824036,824169,824585,829564,836861,820408,822000,839662,838439,816611,828776,835641,837397,844348,844358,816035,816291,816621,821847,825104,826909,826909,827132,830707,837997,840218,841591,814812,814812,818444,818982,821676,823706,824585,830450],["CRY2","MYB60","iPGAM1","AT1G10300","AT1G11960","OZS1","ABA3","CIPK23","LrgB","EDS16","GLR2","DOR","RD20","COI1","ABCC4","iPGAM2","AT3G11130","FER","PIP5K4","CRY1","CRY1","AT4G12290","CBL1","ALMT12","KAT2","NLP7","VAMP711","OST1","AGB1","AT5G04310","AT5G06970","OCP3","AT5G46220","VAM3","CBL9","PHOT2","PHOT2","HAI1","AT5G65590","AT1G05805","MYB61","MYB61","PUB18","PWP2","ROP2","RCN1","CIPK23","FBH3","AT1G51850","BGLU18","MYB50","HT1","HT1","RBOH F","FT","ETR1","EXPA1","NRT1:2","BCA4","BBD1","CPK6","HA1","PLA2-BETA","GRP7","ELF3","GP ALPHA 1","GP ALPHA 1","TED4","SCAB1","DOR","COP1","COP1","BIK1","ABI4","AT2G40820","MPK12","JAR1","CA1","PP2CA","SYP121","PLDALPHA1","PHOT1","AT3G49220","BAG4","AT3G56480","MPK4","MYB55","TPC1","CPK23","CPK23","RR2","AT4G18950","CDPK6","ABI1","EDA39","OST1","PRSL1","EIN2","AT5G20090","PHS1","TGG2","TGG1","MYB86","CYCH;1","RAN1","LHCB3","KCO1","BON3","OZS1","OZS1","ABCG40","AT1G25480","NOGC1","FAB1C","TEJ","EULS3","EEL","FAB1B","SPP1","PCAP1","HXK1","HSC70-1","CDL1","AT5G43410","AT5G48650","HSP81-2","AT5G64010","EXO70B2","OZS1","AT1G23030","RD21A","HT1","LHCB2.2","LHCB2.1","GP ALPHA 1","KT1","ATX1","WRKY54","MPK6","MPK12","Cand2","NHX2","NHX2","TCTP","MKK5","LHCB2.3","iqd21","MAPKKK20","WRKY70","HLECRK","AT3G59780","MPK4","GHR1","ATCES1","OST1","PLDDELTA","HK5","ZIF1","ZIFL1","ZIFL1","CaS","CaS","NHX1","NHX1","AT5G49760","EXO70B1","ABCC5","AT1G55660","LOG2","RABE1c","CEN2","GHR1","UGT76C2","GHR1","AT5G49760","OZS1","CPK6","AT4G14480","AT4G22790","AT4G22790","OST1","AT5G22920","AT5G22920","AT5G46220","ABI2","MAPKKK18","UBC34","UBC32","UBC33","PSB29","PK1B","HCF106","ABCC5","HA1","CYCH;1","ERA1","SDD1","YDA","AT1G75640","TMM","ER","TUBG1","CKX6","GCP2","ERL2","ERL1","AT1G09470","MYC2","EPF2","TRM22","AT1G71866","AT1G80133","CYCA2;4","AT2G05760","NRPB3","AT2G16630","PHYB","EPF1","CHAL","AT2G38160","LSH10","AT3G02120","MUTE","MUTE","AT3G07320","CYP705A30","CLL1","FMA","AT3G44960","AT3G52110","AT3G61610","AT4G12540","STOMAGEN","CLL2","MYC4","AT4G36180","AT4G37810","AT5G01910","AT5G10310","MYC3","SPCH","SPCH","BASL","AT5G62710","AT5G66230","FLP","FLP","TMM","MYB88","CPC","CDKB1;1","CDKB1;1","PP2C5","SOL1","ICE1","AGL16","TCX2","CYCD4;2","CYCD4;1","MAPKKK18","ATSBT5.2","GTL1","MKK4","MPK6","MPK3","STOMAGEN","SPCH","ATSBT5.2","IDD16","EPF2","BCA4","EPF1","CHAL","CHAL","CA1","CYCA2;3","STOMAGEN","CYC3B","FLP","FLP","EPF2","EPF2","AT1G71866","AT1G71866","AT1G80133","AT1G80133","MYB88","EPF1","CHAL","CHAL","MUTE","AT3G13898","CLL1","CLL1","FMA","FMA","STOMAGEN","CLL2","CLL2","AT4G37810","AT4G37810","AT5G10310","AT5G10310","SPCH","AT5G65590","FLP","SCD1","MYB88","TSO1","CDC2","SCRM2","FLP","CYCA2;3","MYB88","CDKB1;2","FMA","CDC2","CYCD3;3","CDKB1;1","CYCD3;1","CYCD3;2","RBR1","FMA","AT1G27695","GAUT11","GAUT10","SHV3","SVL1","AT1G08750","TMM","AT1G80180","NRPB3","HK1","EPF1","SOL1","AT3G59350","STOMAGEN","STOMAGEN","TCX2","MPB2C","FLP","GTL1","MKK4","MYB88","MYB88","CDKB1;2","MPK6","MKK5","MPK3","CDKB1;1","NFXL2"],["cryptochrome 2 [Arabidopsis thaliana (thale cress)]","myb domain protein 60 [Arabidopsis thaliana (thale cress)]","Phosphoglycerate mutase, 2,3-bisphosphoglycerate-independent [Arabidopsis thaliana (thale cress)]","Nucleolar GTP-binding protein [Arabidopsis thaliana (thale cress)]","ERD (early-responsive to dehydration stress) family protein [Arabidopsis thaliana (thale cress)]","C4-dicarboxylate transporter/malic acid transport protein [Arabidopsis thaliana (thale cress)]","molybdenum cofactor sulfurase (LOS5) (ABA3) [Arabidopsis thaliana (thale cress)]","CBL-interacting protein kinase 23 [Arabidopsis thaliana (thale cress)]","membrane protein [Arabidopsis thaliana (thale cress)]","ADC synthase superfamily protein [Arabidopsis thaliana (thale cress)]","glutamate receptor 2 [Arabidopsis thaliana (thale cress)]","F-box and associated interaction domains-containing protein [Arabidopsis thaliana (thale cress)]","Caleosin-related family protein [Arabidopsis thaliana (thale cress)]","RNI-like superfamily protein [Arabidopsis thaliana (thale cress)]","multidrug resistance-associated protein 4 [Arabidopsis thaliana (thale cress)]","Phosphoglycerate mutase, 2,3-bisphosphoglycerate-independent [Arabidopsis thaliana (thale cress)]","Clathrin, heavy chain [Arabidopsis thaliana (thale cress)]","Malectin/receptor-like protein kinase family protein [Arabidopsis thaliana (thale cress)]","phosphatidyl inositol monophosphate 5 kinase 4 [Arabidopsis thaliana (thale cress)]","cryptochrome 1 [Arabidopsis thaliana (thale cress)]","cryptochrome 1 [Arabidopsis thaliana (thale cress)]","Copper amine oxidase family protein [Arabidopsis thaliana (thale cress)]","calcineurin B-like protein 1 [Arabidopsis thaliana (thale cress)]","aluminum-activated, malate transporter 12 [Arabidopsis thaliana (thale cress)]","potassium channel KAT1-like protein [Arabidopsis thaliana (thale cress)]","NIN like protein 7 [Arabidopsis thaliana (thale cress)]","vesicle-associated membrane protein 711 [Arabidopsis thaliana (thale cress)]","Protein kinase superfamily protein [Arabidopsis thaliana (thale cress)]","GTP binding protein beta 1 [Arabidopsis thaliana (thale cress)]","Pectin lyase-like superfamily protein [Arabidopsis thaliana (thale cress)]","plant/protein (DUF810) [Arabidopsis thaliana (thale cress)]","overexpressor of cationic peroxidase 3 [Arabidopsis thaliana (thale cress)]","transmembrane protein (DUF616) [Arabidopsis thaliana (thale cress)]","Syntaxin/t-SNARE family protein [Arabidopsis thaliana (thale cress)]","calcineurin B-like protein 9 [Arabidopsis thaliana (thale cress)]","phototropin 2 [Arabidopsis thaliana (thale cress)]","phototropin 2 [Arabidopsis thaliana (thale cress)]","PP2C protein (Clade A protein phosphatases type 2C) [Arabidopsis thaliana (thale cress)]","Dof-type zinc finger DNA-binding family protein [Arabidopsis thaliana (thale cress)]","basic helix-loop-helix (bHLH) DNA-binding superfamily protein [Arabidopsis thaliana (thale cress)]","myb domain protein 61 [Arabidopsis thaliana (thale cress)]","myb domain protein 61 [Arabidopsis thaliana (thale cress)]","plant U-box 18 [Arabidopsis thaliana (thale cress)]","periodic tryptophan protein 2 [Arabidopsis thaliana (thale cress)]","RHO-related protein from plants 2 [Arabidopsis thaliana (thale cress)]","ARM repeat superfamily protein [Arabidopsis thaliana (thale cress)]","CBL-interacting protein kinase 23 [Arabidopsis thaliana (thale cress)]","basic helix-loop-helix (bHLH) DNA-binding superfamily protein [Arabidopsis thaliana (thale cress)]","Leucine-rich repeat protein kinase family protein [Arabidopsis thaliana (thale cress)]","beta glucosidase 18 [Arabidopsis thaliana (thale cress)]","myb domain protein 50 [Arabidopsis thaliana (thale cress)]","Protein kinase superfamily protein [Arabidopsis thaliana (thale cress)]","Protein kinase superfamily protein [Arabidopsis thaliana (thale cress)]","respiratory burst oxidase protein F [Arabidopsis thaliana (thale cress)]","PEBP (phosphatidylethanolamine-binding protein) family protein [Arabidopsis thaliana (thale cress)]","Signal transduction histidine kinase, hybrid-type, ethylene sensor [Arabidopsis thaliana (thale cress)]","expansin A1 [Arabidopsis thaliana (thale cress)]","nitrate transporter 1:2 [Arabidopsis thaliana (thale cress)]","beta carbonic anhydrase 4 [Arabidopsis thaliana (thale cress)]","bifunctional nuclease in basal defense response 1 [Arabidopsis thaliana (thale cress)]","Calcium-dependent protein kinase family protein [Arabidopsis thaliana (thale cress)]","H[+]-ATPase 1 [Arabidopsis thaliana (thale cress)]","phospholipase A2-beta [Arabidopsis thaliana (thale cress)]","cold, circadian rhythm, and rna binding 2 [Arabidopsis thaliana (thale cress)]","hydroxyproline-rich glycoprotein family protein [Arabidopsis thaliana (thale cress)]","G protein alpha subunit 1 [Arabidopsis thaliana (thale cress)]","G protein alpha subunit 1 [Arabidopsis thaliana (thale cress)]","Plant heme oxygenase (decyclizing) family protein [Arabidopsis thaliana (thale cress)]","plectin-like protein [Arabidopsis thaliana (thale cress)]","F-box and associated interaction domains-containing protein [Arabidopsis thaliana (thale cress)]","Transducin/WD40 repeat-like superfamily protein [Arabidopsis thaliana (thale cress)]","Transducin/WD40 repeat-like superfamily protein [Arabidopsis thaliana (thale cress)]","botrytis-induced kinase1 [Arabidopsis thaliana (thale cress)]","Integrase-type DNA-binding superfamily protein [Arabidopsis thaliana (thale cress)]","stomatal closure actin-binding-like protein [Arabidopsis thaliana (thale cress)]","mitogen-activated protein kinase 12 [Arabidopsis thaliana (thale cress)]","Auxin-responsive GH3 family protein [Arabidopsis thaliana (thale cress)]","carbonic anhydrase 1 [Arabidopsis thaliana (thale cress)]","protein phosphatase 2CA [Arabidopsis thaliana (thale cress)]","syntaxin of plants 121 [Arabidopsis thaliana (thale cress)]","phospholipase D alpha 1 [Arabidopsis thaliana (thale cress)]","phototropin 1 [Arabidopsis thaliana (thale cress)]","Plant invertase/pectin methylesterase inhibitor superfamily [Arabidopsis thaliana (thale cress)]","BCL-2-associated athanogene 4 [Arabidopsis thaliana (thale cress)]","myosin heavy chain-like protein [Arabidopsis thaliana (thale cress)]","MAP kinase 4 [Arabidopsis thaliana (thale cress)]","myb domain protein 55 [Arabidopsis thaliana (thale cress)]","two-pore channel 1 [Arabidopsis thaliana (thale cress)]","calcium-dependent protein kinase 23 [Arabidopsis thaliana (thale cress)]","calcium-dependent protein kinase 23 [Arabidopsis thaliana (thale cress)]","response regulator 2 [Arabidopsis thaliana (thale cress)]","Integrin-linked protein kinase family [Arabidopsis thaliana (thale cress)]","calcium-dependent protein kinase 6 [Arabidopsis thaliana (thale cress)]","Protein phosphatase 2C family protein [Arabidopsis thaliana (thale cress)]","calmodulin-binding family protein [Arabidopsis thaliana (thale cress)]","Protein kinase superfamily protein [Arabidopsis thaliana (thale cress)]","GRAM domain family protein [Arabidopsis thaliana (thale cress)]","NRAMP metal ion transporter family protein [Arabidopsis thaliana (thale cress)]","Uncharacterized protein family (UPF0041) [Arabidopsis thaliana (thale cress)]","dual specificity protein phosphatase family protein [Arabidopsis thaliana (thale cress)]","glucoside glucohydrolase 2 [Arabidopsis thaliana (thale cress)]","thioglucoside glucohydrolase 1 [Arabidopsis thaliana (thale cress)]","myb domain protein 86 [Arabidopsis thaliana (thale cress)]","cyclin H;1 [Arabidopsis thaliana (thale cress)]","copper-exporting ATPase / responsive-to-antagonist 1 / copper-transporting ATPase (RAN1) [Arabidopsis thaliana (thale cress)]","light-harvesting chlorophyll B-binding protein 3 [Arabidopsis thaliana (thale cress)]","Outward rectifying potassium channel protein [Arabidopsis thaliana (thale cress)]","Calcium-dependent phospholipid-binding Copine family protein [Arabidopsis thaliana (thale cress)]","C4-dicarboxylate transporter/malic acid transport protein [Arabidopsis thaliana (thale cress)]","C4-dicarboxylate transporter/malic acid transport protein [Arabidopsis thaliana (thale cress)]","pleiotropic drug resistance 12 [Arabidopsis thaliana (thale cress)]","aluminum activated malate transporter family protein [Arabidopsis thaliana (thale cress)]","flavin containing monooxygenase FMO GS-OX-like protein [Arabidopsis thaliana (thale cress)]","FORMS APLOID AND BINUCLEATE CELLS 1C [Arabidopsis thaliana (thale cress)]","Poly (ADP-ribose) glycohydrolase (PARG) [Arabidopsis thaliana (thale cress)]","hydroxyproline-rich glycoprotein family protein [Arabidopsis thaliana (thale cress)]","Basic-leucine zipper (bZIP) transcription factor family protein [Arabidopsis thaliana (thale cress)]","phosphatidylinositol-4-phosphate 5-kinase family protein [Arabidopsis thaliana (thale cress)]","Phosphatidic acid phosphatase (PAP2) family protein [Arabidopsis thaliana (thale cress)]","plasma-membrane associated cation-binding protein 1 [Arabidopsis thaliana (thale cress)]","hexokinase 1 [Arabidopsis thaliana (thale cress)]","heat shock cognate protein 70-1 [Arabidopsis thaliana (thale cress)]","Protein kinase superfamily protein [Arabidopsis thaliana (thale cress)]","Integrase-type DNA-binding superfamily protein [Arabidopsis thaliana (thale cress)]","Nuclear transport factor 2 (NTF2) family protein with RNA binding (RRM-RBD-RNP motifs) domain-containing protein [Arabidopsis thaliana (thale cress)]","heat shock protein 81-2 [Arabidopsis thaliana (thale cress)]","U2 small nuclear ribonucleoprotein auxiliary factor-like protein [Arabidopsis thaliana (thale cress)]","exocyst subunit exo70 family protein B2 [Arabidopsis thaliana (thale cress)]","C4-dicarboxylate transporter/malic acid transport protein [Arabidopsis thaliana (thale cress)]","ARM repeat superfamily protein [Arabidopsis thaliana (thale cress)]","Granulin repeat cysteine protease family protein [Arabidopsis thaliana (thale cress)]","Protein kinase superfamily protein [Arabidopsis thaliana (thale cress)]","photosystem II light harvesting complex protein 2.2 [Arabidopsis thaliana (thale cress)]","photosystem II light harvesting complex protein 2.1 [Arabidopsis thaliana (thale cress)]","G protein alpha subunit 1 [Arabidopsis thaliana (thale cress)]","K+ transporter 1 [Arabidopsis thaliana (thale cress)]","homologue of trithorax [Arabidopsis thaliana (thale cress)]","WRKY DNA-binding protein 54 [Arabidopsis thaliana (thale cress)]","MAP kinase 6 [Arabidopsis thaliana (thale cress)]","mitogen-activated protein kinase 12 [Arabidopsis thaliana (thale cress)]","Protein of unknown function, transmembrane-40 [Arabidopsis thaliana (thale cress)]","sodium hydrogen exchanger 2 [Arabidopsis thaliana (thale cress)]","sodium hydrogen exchanger 2 [Arabidopsis thaliana (thale cress)]","translationally controlled tumor protein [Arabidopsis thaliana (thale cress)]","MAP kinase kinase 5 [Arabidopsis thaliana (thale cress)]","photosystem II light harvesting complex protein 2.3 [Arabidopsis thaliana (thale cress)]","IQ-domain 21 [Arabidopsis thaliana (thale cress)]","mitogen-activated protein kinase kinase kinase 20 [Arabidopsis thaliana (thale cress)]","WRKY DNA-binding protein 70 [Arabidopsis thaliana (thale cress)]","lectin-receptor kinase [Arabidopsis thaliana (thale cress)]","Rhodanese/Cell cycle control phosphatase superfamily protein [Arabidopsis thaliana (thale cress)]","MAP kinase 4 [Arabidopsis thaliana (thale cress)]","Leucine-rich receptor-like protein kinase family protein [Arabidopsis thaliana (thale cress)]","Alkaline phytoceramidase (aPHC) [Arabidopsis thaliana (thale cress)]","Protein kinase superfamily protein [Arabidopsis thaliana (thale cress)]","phospholipase D delta [Arabidopsis thaliana (thale cress)]","histidine kinase 5 [Arabidopsis thaliana (thale cress)]","zinc induced facilitator 1 [Arabidopsis thaliana (thale cress)]","zinc induced facilitator-like 1 [Arabidopsis thaliana (thale cress)]","zinc induced facilitator-like 1 [Arabidopsis thaliana (thale cress)]","calcium sensing receptor [Arabidopsis thaliana (thale cress)]","calcium sensing receptor [Arabidopsis thaliana (thale cress)]","Na+/H+ exchanger 1 [Arabidopsis thaliana (thale cress)]","Na+/H+ exchanger 1 [Arabidopsis thaliana (thale cress)]","Leucine-rich repeat protein kinase family protein [Arabidopsis thaliana (thale cress)]","exocyst subunit exo70 family protein B1 [Arabidopsis thaliana (thale cress)]","multidrug resistance-associated protein 5 [Arabidopsis thaliana (thale cress)]","FBD, F-box and Leucine Rich Repeat domains containing protein [Arabidopsis thaliana (thale cress)]","RING/U-box superfamily protein [Arabidopsis thaliana (thale cress)]","RAB GTPase homolog 8A [Arabidopsis thaliana (thale cress)]","centrin2 [Arabidopsis thaliana (thale cress)]","Leucine-rich receptor-like protein kinase family protein [Arabidopsis thaliana (thale cress)]","UDP-glucosyl transferase 76C2 [Arabidopsis thaliana (thale cress)]","Leucine-rich receptor-like protein kinase family protein [Arabidopsis thaliana (thale cress)]","Leucine-rich repeat protein kinase family protein [Arabidopsis thaliana (thale cress)]","C4-dicarboxylate transporter/malic acid transport protein [Arabidopsis thaliana (thale cress)]","Calcium-dependent protein kinase family protein [Arabidopsis thaliana (thale cress)]","Protein kinase superfamily protein [Arabidopsis thaliana (thale cress)]","MATE efflux family protein [Arabidopsis thaliana (thale cress)]","MATE efflux family protein [Arabidopsis thaliana (thale cress)]","Protein kinase superfamily protein [Arabidopsis thaliana (thale cress)]","CHY-type/CTCHY-type/RING-type Zinc finger protein [Arabidopsis thaliana (thale cress)]","CHY-type/CTCHY-type/RING-type Zinc finger protein [Arabidopsis thaliana (thale cress)]","transmembrane protein (DUF616) [Arabidopsis thaliana (thale cress)]","Protein phosphatase 2C family protein [Arabidopsis thaliana (thale cress)]","mitogen-activated protein kinase kinase kinase 18 [Arabidopsis thaliana (thale cress)]","ubiquitin-conjugating enzyme 34 [Arabidopsis thaliana (thale cress)]","ubiquitin-conjugating enzyme 32 [Arabidopsis thaliana (thale cress)]","ubiquitin-conjugating enzyme 33 [Arabidopsis thaliana (thale cress)]","photosystem II reaction center PSB29 protein [Arabidopsis thaliana (thale cress)]","protein kinase 1B [Arabidopsis thaliana (thale cress)]","Bacterial sec-independent translocation protein mttA/Hcf106 [Arabidopsis thaliana (thale cress)]","multidrug resistance-associated protein 5 [Arabidopsis thaliana (thale cress)]","H[+]-ATPase 1 [Arabidopsis thaliana (thale cress)]","cyclin H;1 [Arabidopsis thaliana (thale cress)]","Prenyltransferase family protein [Arabidopsis thaliana (thale cress)]","Subtilase family protein [Arabidopsis thaliana (thale cress)]","Protein kinase superfamily protein [Arabidopsis thaliana (thale cress)]","Leucine-rich receptor-like protein kinase family protein [Arabidopsis thaliana (thale cress)]","Leucine-rich repeat (LRR) family protein [Arabidopsis thaliana (thale cress)]","Leucine-rich receptor-like protein kinase family protein [Arabidopsis thaliana (thale cress)]","gamma-tubulin [Arabidopsis thaliana (thale cress)]","cytokinin oxidase/dehydrogenase 6 [Arabidopsis thaliana (thale cress)]","gamma-tubulin complex protein 2 [Arabidopsis thaliana (thale cress)]","ERECTA-like 2 [Arabidopsis thaliana (thale cress)]","ERECTA-like 1 [Arabidopsis thaliana (thale cress)]","myosin heavy chain, cardiac protein [Arabidopsis thaliana (thale cress)]","Basic helix-loop-helix (bHLH) DNA-binding family protein [Arabidopsis thaliana (thale cress)]","Putative membrane lipoprotein [Arabidopsis thaliana (thale cress)]","DnaA initiator-associating protein [Arabidopsis thaliana (thale cress)]","EPIDERMAL PATTERNING FACTOR-like protein [Arabidopsis thaliana (thale cress)]","EPIDERMAL PATTERNING FACTOR-like protein [Arabidopsis thaliana (thale cress)]","Cyclin A2;4 [Arabidopsis thaliana (thale cress)]","Xanthine/uracil permease family protein [Arabidopsis thaliana (thale cress)]","DNA-directed RNA polymerase family protein [Arabidopsis thaliana (thale cress)]","Pollen Ole e 1 allergen and extensin family protein [Arabidopsis thaliana (thale cress)]","phytochrome B [Arabidopsis thaliana (thale cress)]","epidermal patterning factor 1 [Arabidopsis thaliana (thale cress)]","allergen-like protein [Arabidopsis thaliana (thale cress)]","hypothetical protein [Arabidopsis thaliana (thale cress)]","LIGHT-DEPENDENT SHORT HYPOCOTYLS-like protein (DUF640) [Arabidopsis thaliana (thale cress)]","hydroxyproline-rich glycoprotein family protein [Arabidopsis thaliana (thale cress)]","basic helix-loop-helix (bHLH) DNA-binding superfamily protein [Arabidopsis thaliana (thale cress)]","basic helix-loop-helix (bHLH) DNA-binding superfamily protein [Arabidopsis thaliana (thale cress)]","O-Glycosyl hydrolases family 17 protein [Arabidopsis thaliana (thale cress)]","cytochrome P450, family 705, subfamily A, polypeptide 30 [Arabidopsis thaliana (thale cress)]","allergen-like protein [Arabidopsis thaliana (thale cress)]","basic helix-loop-helix (bHLH) DNA-binding superfamily protein [Arabidopsis thaliana (thale cress)]","shugoshin [Arabidopsis thaliana (thale cress)]","interferon-activable protein [Arabidopsis thaliana (thale cress)]","Galactose mutarotase-like superfamily protein [Arabidopsis thaliana (thale cress)]","hypothetical protein [Arabidopsis thaliana (thale cress)]","stomagen [Arabidopsis thaliana (thale cress)]","EPIDERMAL PATTERNING FACTOR-like protein [Arabidopsis thaliana (thale cress)]","Basic helix-loop-helix (bHLH) DNA-binding family protein [Arabidopsis thaliana (thale cress)]","Leucine-rich receptor-like protein kinase family protein [Arabidopsis thaliana (thale cress)]","EPIDERMAL PATTERNING FACTOR-like protein [Arabidopsis thaliana (thale cress)]","myelin transcription factor [Arabidopsis thaliana (thale cress)]","EPIDERMAL PATTERNING FACTOR-like protein [Arabidopsis thaliana (thale cress)]","Basic helix-loop-helix (bHLH) DNA-binding family protein [Arabidopsis thaliana (thale cress)]","basic helix-loop-helix (bHLH) DNA-binding superfamily protein [Arabidopsis thaliana (thale cress)]","basic helix-loop-helix (bHLH) DNA-binding superfamily protein [Arabidopsis thaliana (thale cress)]","breaking of asymmetry in the stomatal lineage [Arabidopsis thaliana (thale cress)]","Leucine-rich repeat protein kinase family protein [Arabidopsis thaliana (thale cress)]","Chalcone-flavanone isomerase family protein [Arabidopsis thaliana (thale cress)]","Duplicated homeodomain-like superfamily protein [Arabidopsis thaliana (thale cress)]","Duplicated homeodomain-like superfamily protein [Arabidopsis thaliana (thale cress)]","Leucine-rich repeat (LRR) family protein [Arabidopsis thaliana (thale cress)]","myb domain protein 88 [Arabidopsis thaliana (thale cress)]","Homeodomain-like superfamily protein [Arabidopsis thaliana (thale cress)]","cyclin-dependent kinase B1;1 [Arabidopsis thaliana (thale cress)]","cyclin-dependent kinase B1;1 [Arabidopsis thaliana (thale cress)]","phosphatase 2C5 [Arabidopsis thaliana (thale cress)]","Tesmin/TSO1-like CXC domain-containing protein [Arabidopsis thaliana (thale cress)]","basic helix-loop-helix (bHLH) DNA-binding superfamily protein [Arabidopsis thaliana (thale cress)]","AGAMOUS-like 16 [Arabidopsis thaliana (thale cress)]","TESMIN/TSO1-like CXC 2 [Arabidopsis thaliana (thale cress)]","cyclin d4;2 [Arabidopsis thaliana (thale cress)]","CYCLIN D4;1 [Arabidopsis thaliana (thale cress)]","mitogen-activated protein kinase kinase kinase 18 [Arabidopsis thaliana (thale cress)]","Subtilisin-like serine endopeptidase family protein [Arabidopsis thaliana (thale cress)]","GT-2-like 1 [Arabidopsis thaliana (thale cress)]","mitogen-activated protein kinase kinase 4 [Arabidopsis thaliana (thale cress)]","MAP kinase 6 [Arabidopsis thaliana (thale cress)]","mitogen-activated protein kinase 3 [Arabidopsis thaliana (thale cress)]","stomagen [Arabidopsis thaliana (thale cress)]","basic helix-loop-helix (bHLH) DNA-binding superfamily protein [Arabidopsis thaliana (thale cress)]","Subtilisin-like serine endopeptidase family protein [Arabidopsis thaliana (thale cress)]","indeterminate(ID)-domain 16 [Arabidopsis thaliana (thale cress)]","Putative membrane lipoprotein [Arabidopsis thaliana (thale cress)]","beta carbonic anhydrase 4 [Arabidopsis thaliana (thale cress)]","epidermal patterning factor 1 [Arabidopsis thaliana (thale cress)]","allergen-like protein [Arabidopsis thaliana (thale cress)]","allergen-like protein [Arabidopsis thaliana (thale cress)]","carbonic anhydrase 1 [Arabidopsis thaliana (thale cress)]","CYCLIN A2;3 [Arabidopsis thaliana (thale cress)]","stomagen [Arabidopsis thaliana (thale cress)]","mitotic-like cyclin 3B from Arabidopsi [Arabidopsis thaliana (thale cress)]","Duplicated homeodomain-like superfamily protein [Arabidopsis thaliana (thale cress)]","Duplicated homeodomain-like superfamily protein [Arabidopsis thaliana (thale cress)]","Putative membrane lipoprotein [Arabidopsis thaliana (thale cress)]","Putative membrane lipoprotein [Arabidopsis thaliana (thale cress)]","EPIDERMAL PATTERNING FACTOR-like protein [Arabidopsis thaliana (thale cress)]","EPIDERMAL PATTERNING FACTOR-like protein [Arabidopsis thaliana (thale cress)]","EPIDERMAL PATTERNING FACTOR-like protein [Arabidopsis thaliana (thale cress)]","EPIDERMAL PATTERNING FACTOR-like protein [Arabidopsis thaliana (thale cress)]","myb domain protein 88 [Arabidopsis thaliana (thale cress)]","epidermal patterning factor 1 [Arabidopsis thaliana (thale cress)]","allergen-like protein [Arabidopsis thaliana (thale cress)]","allergen-like protein [Arabidopsis thaliana (thale cress)]","basic helix-loop-helix (bHLH) DNA-binding superfamily protein [Arabidopsis thaliana (thale cress)]","EPIDERMAL PATTERNING FACTOR-like protein [Arabidopsis thaliana (thale cress)]","allergen-like protein [Arabidopsis thaliana (thale cress)]","allergen-like protein [Arabidopsis thaliana (thale cress)]","basic helix-loop-helix (bHLH) DNA-binding superfamily protein [Arabidopsis thaliana (thale cress)]","basic helix-loop-helix (bHLH) DNA-binding superfamily protein [Arabidopsis thaliana (thale cress)]","stomagen [Arabidopsis thaliana (thale cress)]","EPIDERMAL PATTERNING FACTOR-like protein [Arabidopsis thaliana (thale cress)]","EPIDERMAL PATTERNING FACTOR-like protein [Arabidopsis thaliana (thale cress)]","EPIDERMAL PATTERNING FACTOR-like protein [Arabidopsis thaliana (thale cress)]","EPIDERMAL PATTERNING FACTOR-like protein [Arabidopsis thaliana (thale cress)]","EPIDERMAL PATTERNING FACTOR-like protein [Arabidopsis thaliana (thale cress)]","EPIDERMAL PATTERNING FACTOR-like protein [Arabidopsis thaliana (thale cress)]","basic helix-loop-helix (bHLH) DNA-binding superfamily protein [Arabidopsis thaliana (thale cress)]","Dof-type zinc finger DNA-binding family protein [Arabidopsis thaliana (thale cress)]","Duplicated homeodomain-like superfamily protein [Arabidopsis thaliana (thale cress)]","stomatal cytokinesis defective / SCD1 protein (SCD1) [Arabidopsis thaliana (thale cress)]","myb domain protein 88 [Arabidopsis thaliana (thale cress)]","Tesmin/TSO1-like CXC domain-containing protein [Arabidopsis thaliana (thale cress)]","cell division control 2 [Arabidopsis thaliana (thale cress)]","basic helix-loop-helix (bHLH) DNA-binding superfamily protein [Arabidopsis thaliana (thale cress)]","Duplicated homeodomain-like superfamily protein [Arabidopsis thaliana (thale cress)]","CYCLIN A2;3 [Arabidopsis thaliana (thale cress)]","myb domain protein 88 [Arabidopsis thaliana (thale cress)]","cyclin-dependent kinase B1;2 [Arabidopsis thaliana (thale cress)]","basic helix-loop-helix (bHLH) DNA-binding superfamily protein [Arabidopsis thaliana (thale cress)]","cell division control 2 [Arabidopsis thaliana (thale cress)]","CYCLIN D3;3 [Arabidopsis thaliana (thale cress)]","cyclin-dependent kinase B1;1 [Arabidopsis thaliana (thale cress)]","CYCLIN D3;1 [Arabidopsis thaliana (thale cress)]","CYCLIN D3;2 [Arabidopsis thaliana (thale cress)]","retinoblastoma-related 1 [Arabidopsis thaliana (thale cress)]","basic helix-loop-helix (bHLH) DNA-binding superfamily protein [Arabidopsis thaliana (thale cress)]","glycine-rich protein [Arabidopsis thaliana (thale cress)]","galacturonosyltransferase 11 [Arabidopsis thaliana (thale cress)]","galacturonosyltransferase 10 [Arabidopsis thaliana (thale cress)]","PLC-like phosphodiesterase family protein [Arabidopsis thaliana (thale cress)]","SHV3-like 1 [Arabidopsis thaliana (thale cress)]","Peptidase C13 family [Arabidopsis thaliana (thale cress)]","Leucine-rich repeat (LRR) family protein [Arabidopsis thaliana (thale cress)]","hypothetical protein [Arabidopsis thaliana (thale cress)]","DNA-directed RNA polymerase family protein [Arabidopsis thaliana (thale cress)]","histidine kinase 1 [Arabidopsis thaliana (thale cress)]","epidermal patterning factor 1 [Arabidopsis thaliana (thale cress)]","Tesmin/TSO1-like CXC domain-containing protein [Arabidopsis thaliana (thale cress)]","Protein kinase superfamily protein [Arabidopsis thaliana (thale cress)]","stomagen [Arabidopsis thaliana (thale cress)]","stomagen [Arabidopsis thaliana (thale cress)]","TESMIN/TSO1-like CXC 2 [Arabidopsis thaliana (thale cress)]","movement protein binding protein 2C [Arabidopsis thaliana (thale cress)]","Duplicated homeodomain-like superfamily protein [Arabidopsis thaliana (thale cress)]","GT-2-like 1 [Arabidopsis thaliana (thale cress)]","mitogen-activated protein kinase kinase 4 [Arabidopsis thaliana (thale cress)]","myb domain protein 88 [Arabidopsis thaliana (thale cress)]","myb domain protein 88 [Arabidopsis thaliana (thale cress)]","cyclin-dependent kinase B1;2 [Arabidopsis thaliana (thale cress)]","MAP kinase 6 [Arabidopsis thaliana (thale cress)]","MAP kinase kinase 5 [Arabidopsis thaliana (thale cress)]","mitogen-activated protein kinase 3 [Arabidopsis thaliana (thale cress)]","cyclin-dependent kinase B1;1 [Arabidopsis thaliana (thale cress)]","NF-X1-type zinc finger protein NFXL2 [Arabidopsis thaliana (thale cress)]"],["AT1G04400, AT-PHH1, ATCRY2, CRYPTOCHROME 2 APOPROTEIN, F19P19.14, F19P19_14, FHA, PHH1, cryptochrome 2","AT1G08810, AtMYB60, F22O13.30, F22O13_30, myb domain protein 60","AT1G09780, 2, 3-biphosphoglycerate-independent phosphoglycerate mutase 1, F21M12.16, F21M12_16","AT1G10300, F14N23.18, F14N23_18","AT1G11960, F12F1.17, F12F1_17","AT1G12480, CARBON DIOXIDE INSENSITIVE 3, CDI3, F5O11.23, F5O11_23, OZONE-SENSITIVE 1, RADICAL-INDUCED CELL DEATH 3, RCD3, SLAC1, SLOW ANION CHANNEL-ASSOCIATED 1","AT1G16540, ABA DEFICIENT 3, ACI2, ALTERED CHLOROPLAST IMPORT 2, ATABA3, AtLOS5, F19K19.13, F19K19_13, LOS5, LOW OSMOTIC STRESS 5, MOLYBDENUM COFACTOR SULFURASE, SIR3, SIRTINOL RESISTANT 3","AT1G30270, ATCIPK23, CBL-interacting protein kinase 23, F12P21.6, F12P21_6, LKS1, LOW-K+-SENSITIVE 1, PKS17, SNF1-RELATED PROTEIN KINASE 3.23, SOS2-like protein kinase 17, SnRK3.23","AT1G32080, AtLrgB, F3C3.12","AT1G74710, ARABIDOPSIS ISOCHORISMATE SYNTHASE 1, ATICS1, ENHANCED DISEASE SUSCEPTIBILITY TO ERYSIPHE ORONTII 16, F25A4.31, ICS1, ISOCHORISMATE SYNTHASE, ISOCHORISMATE SYNTHASE 1, SALICYLIC ACID INDUCTION DEFICIENT 2, SID2","AT2G17260, ATGLR2, ATGLR3.1, F5J6.2, F5J6_2, GLR3.1, GLUTAMATE RECEPTOR 2, glutamate receptor 2","AT2G31470, DROUGHT TOLERANCE REPRESSOR, T28P16.4, T28P16_4","AT2G33380, Arabidopsis thaliana caleosin 3, AtCLO3, AtRD20, CALEOSIN 3, CLO-3, CLO3, F4P9.15, F4P9_15, PXG3, RESPONSIVE TO DESSICATION 20, caleosin 3, peroxygenase 3","AT2G39940, CORONATINE INSENSITIVE 1, T28M21.10, T28M21_10","AT2G47800, ATMRP4, ATP-binding cassette C4, EST3, F17A22.19, MRP4, multidrug resistance-associated protein 4","AT3G08590, 2, 3-biphosphoglycerate-independent phosphoglycerate mutase 2","AT3G11130, AtCHC1, CHC1, F11B9.30, clathrin heavy chain 1","AT3G51550, FERONIA","AT3G56960, T8M16.6, phosphatidyl inositol monophosphate 5 kinase 4","AT4G08920, ATCRY1, BLU1, BLUE LIGHT UNINHIBITED 1, CRYPTOCHROME 1 APOPROTEIN (BLUE LIGHT PHOTORECEPTOR, ELONGATED HYPOCOTYL 4, HY4, OOP2, OUT OF PHASE 2, T3H13.14, T3H13_14, cryptochrome 1","AT4G08920, ATCRY1, BLU1, BLUE LIGHT UNINHIBITED 1, CRYPTOCHROME 1 APOPROTEIN (BLUE LIGHT PHOTORECEPTOR, ELONGATED HYPOCOTYL 4, HY4, OOP2, OUT OF PHASE 2, T3H13.14, T3H13_14, cryptochrome 1","AT4G12290, T4C9.130, T4C9_130","AT4G17615, ARABIDOPSIS THALIANA CALCINEURIN B-LIKE PROTEIN, ATCBL1, FCAALL.122, SCABP5, SOS3-LIKE CALCIUM BINDING PROTEIN 5, calcineurin B-like protein 1","AT4G17970, ATALMT12, QUAC1, T6K21.150, T6K21_150, aluminum-activated, malate transporter 12, quick-activating anion channel 1","AT4G18290, T9A21.140, T9A21_140, VOLTAGE-GATED POTASSIUM CHANNEL 2, potassium channel in Arabidopsis thaliana 2","AT4G24020, NIN like protein 7, T19F6.10, T19F6_10","AT4G32150, ATVAMP711, F10N7.40, F10N7_40, vesicle-associated membrane protein 711","AT4G33950, ATOST1, F17I5.140, F17I5_140, OPEN STOMATA 1, P44, SNF1-RELATED PROTEIN KINASE 2.6, SNRK2-6, SNRK2.6, SRK2E, SUCROSE NONFERMENTING 1-RELATED PROTEIN KINASE 2-6","AT4G34460, ARABIDOPSIS G-PROTEIN BETA SUBUNIT, ATAGB1, ELK4, ERECTA-LIKE 4, GTP binding protein beta 1, T4L20.40, T4L20_40","AT5G04310, T19N18.40, T19N18_40","AT5G06970, MOJ9.14, MOJ9_14","AT5G11270, F2I11.160, F2I11_160, overexpressor of cationic peroxidase 3","AT5G46220, MDE13.4, MDE13_4","AT5G46860, ARABIDOPSIS THALIANA SYNTAXIN OF PLANTS 22, ARABIDOPSIS THALIANA VACUOLAR MORPHOLOGY 3, ATSYP22, ATVAM3, SGR3, SHOOT GRAVITROPISM 3, SYNTAXIN OF PLANTS 22, SYP22, VACUOLAR MORPHOLOGY 3","AT5G47100, ATCBL9, K14A3.5, K14A3_5, calcineurin B-like protein 9","AT5G58140, AtPHOT2, K21L19.6, K21L19_6, NON PHOTOTROPIC HYPOCOTYL 1-LIKE, NPL1, phototropin 2","AT5G58140, AtPHOT2, K21L19.6, K21L19_6, NON PHOTOTROPIC HYPOCOTYL 1-LIKE, NPL1, phototropin 2","AT5G59220, MNC17.13, MNC17_13, SAG113, highly ABA-induced PP2C gene 1, senescence associated gene 113","AT5G65590, K21L13.10, K21L13_10, SCAP1, STOMATAL CARPENTER 1","AT1G05805, ABA-responsive kinase substrate 2, AKS2","AT1G09540, ARABIDOPSIS THALIANA MYB DOMAIN PROTEIN 61, ATMYB61, F14J9.20, F14J9_20, myb domain protein 61","AT1G09540, ARABIDOPSIS THALIANA MYB DOMAIN PROTEIN 61, ATMYB61, F14J9.20, F14J9_20, myb domain protein 61","AT1G10560, ARABIDOPSIS THALIANA PLANT U-BOX 18, ATPUB18, T10O24.19, T10O24_19, plant U-box 18","AT1G15440, (PERIODIC TRYPTOPHAN PROTEIN 2, ATPWP2, F9L1.40, F9L1_40, PERIODIC TRYPTOPHAN PROTEIN 2, periodic tryptophan protein 2","AT1G20090, ARAC4, ATRAC4, ATROP2, Arabidopsis RAC-like 4, GTP-BINDING PROTEIN ARAC4, RHO-related protein from plants 2, T20H2.12, T20H2_12","AT1G25490, ATB BETA BETA, EER1, ENHANCED ETHYLENE RESPONSE 1, F2J7.19, F2J7_19, PHOSPHOPROTEIN PHOSPHATASE 2A REGULATORY SUBUNIT A, REGA, ROOTS CURL IN NPA, SERINE/THREONINE PROTEIN PHOSPHATASE TYPE 2A REGULATORY SUBUNIT A","AT1G30270, ATCIPK23, CBL-interacting protein kinase 23, F12P21.6, F12P21_6, LKS1, LOW-K+-SENSITIVE 1, PKS17, SNF1-RELATED PROTEIN KINASE 3.23, SOS2-like protein kinase 17, SnRK3.23","AT1G51140, ABA-responsive kinase substrate 1, AKS1, F23H24.3, F23H24_3, FLOWERING BHLH 3","AT1G51850, T14L22.6, T14L22_6","AT1G52400, A. THALIANA BETA-GLUCOSIDASE 1, ATBG1, BETA-GLUCOSIDASE HOMOLOG 1, BGL1, F19K6.15, F19K6_15, beta glucosidase 18","AT1G57560, AtMYB50, T8L23.3, T8L23_3, myb domain protein 50","AT1G62400, F24O1.13, F24O1_13, high leaf temperature 1","AT1G62400, F24O1.13, F24O1_13, high leaf temperature 1","AT1G64060, ARABIDOPSIS THALIANA RESPIRATORY BURST OXIDASE HOMOLOG  F, ARABIDOPSIS THALIANA RESPIRATORY BURST OXIDASE HOMOLOG F, ATRBOH F, ATRBOHF, CYTOCHROME B245 BETA CHAIN HOMOLOG RBOHAP108, F22C12.18, F22C12_18, RBOHAP108, RBOHF, RESPIRATORY BURST OXIDASE PROTEIN F, respiratory burst oxidase protein F","AT1G65480, F5I14.3, F5I14_3, FLOWERING LOCUS T, REDUCED STEM BRANCHING 8, RSB8","AT1G66340, AtETR1, EIN1, ETHYLENE INSENSITIVE 1, ETHYLENE RESPONSE, ETHYLENE RESPONSE 1, ETR, HISTIDINE KINASE ETR1, T27F4.9, T27F4_9","AT1G69530, AT-EXP1, ATEXP1, ATEXPA1, ATHEXP ALPHA 1.2, EXP1, EXPANSIN 1, F10D13.18, F10D13_18, expansin A1","AT1G69850, ABA-importing transporter 1, AIT1, ATNRT1:2, AtNPF4.6, NPF4.6, NRT1.2, NRT1/ PTR family 4.6, NTL1, T17F3.12, T17F3_12, nitrate transporter 1:2","AT1G70410, ATBCA4, BETA CARBONIC ANHYDRASE 4, CA4, F17O7.5, F17O7_5, beta carbonic anhydrase 4","AT1G75380, ATBBD1, F1B16.9, F1B16_9, bifunctional nuclease in basal defense response 1","AT2G17290, ARABIDOPSIS THALIANA CALCIUM-DEPENDENT PROTEIN KINASE 6, ARABIDOPSIS THALIANA CALMODULIN-DOMAIN PROTEIN KINASE 3, ATCDPK3, ATCPK6, CALCIUM-DEPENDENT PROTEIN KINASE 6, CALMODULIN-DOMAIN PROTEIN KINASE 3, F5J6.13, F5J6_13, calcium dependent protein kinase 6","AT2G18960, AHA1, F19F24.16, F19F24_16, H(+)-ATPase 1, OPEN STOMATA 2, OST2, PLASMA MEMBRANE PROTON ATPASE, PMA","AT2G19690, F6F22.28, F6F22_28, phospholipase A2-beta","AT2G21660, ''cold, ATGPR7, ATGRP7, CCR2, F2G1.4, GLYCINE RICH PROTEIN 7, GLYCINE-RICH RNA-BINDING PROTEIN 7, GR-RBP7, and rna binding 2, and rna binding 2'', circadian rhythm, cold","AT2G25930, EARLY FLOWERING 3, F17H15.25, PYK20","AT2G26300, ARABIDOPSIS THALIANA G PROTEIN ALPHA SUBUNIT 1, ATGPA1, G PROTEIN ALPHA SUBUNIT, G PROTEIN ALPHA SUBUNIT 1, G protein alpha subunit 1, GPA1, T1D16.6, T1D16_6","AT2G26300, ARABIDOPSIS THALIANA G PROTEIN ALPHA SUBUNIT 1, ATGPA1, G PROTEIN ALPHA SUBUNIT, G PROTEIN ALPHA SUBUNIT 1, G protein alpha subunit 1, GPA1, T1D16.6, T1D16_6","AT2G26670, ARABIDOPSIS THALIANA HEME OXYGENASE 1, ATHO1, F18A8.4, F18A8_4, GENOMES UNCOUPLED 2, GUN2, HEME OXYGENASE, HEME OXYGENASE 1, HEME OXYGENASE 6, HO1, HY1, HY6, PLASTID HEME OXYGENASE, REVERSAL OF THE DET PHENOTYPE 4","AT2G26770, F18A8.14, F18A8_14, stomatal closure-related actin binding protein 1","AT2G31470, DROUGHT TOLERANCE REPRESSOR, T28P16.4, T28P16_4","AT2G32950, ARABIDOPSIS THALIANA CONSTITUTIVE PHOTOMORPHOGENIC 1, ATCOP1, CONSTITUTIVE PHOTOMORPHOGENIC 1, DEETIOLATED MUTANT 340, DET340, EMB168, EMBRYO DEFECTIVE 168, FUS1, FUSCA 1, T21L14.11, T21L14_11","AT2G32950, ARABIDOPSIS THALIANA CONSTITUTIVE PHOTOMORPHOGENIC 1, ATCOP1, CONSTITUTIVE PHOTOMORPHOGENIC 1, DEETIOLATED MUTANT 340, DET340, EMB168, EMBRYO DEFECTIVE 168, FUS1, FUSCA 1, T21L14.11, T21L14_11","AT2G39660, F12L6.32, F12L6_32, botrytis-induced kinase1","AT2G40220, ABA INSENSITIVE 4, ABSCISIC ACID-INSENSITIVE PROTEIN 4, ATABI4, GIN6, GLUCOSE INSENSITIVE 6, IMPAIRED SUCROSE INDUCTION 3, ISI3, SALOBRENO 5, SAN5, SIS5, SUCROSE UNCOUPLED 6, SUGAR-INSENSITIVE 5, SUN6, T7M7.16","AT2G40820, T20B5.2, T20B5_2","AT2G46070, ATMPK12, MAPK12, T3F17.28, mitogen-activated protein kinase 12","AT2G46370, AtGH3.11, F11C10.6, FAR-RED INSENSITIVE 219, FIN219, JASMONATE RESISTANT 1","AT3G01500, ARABIDOPSIS THALIANA SALICYLIC ACID-BINDING PROTEIN 3, ATBCA1, ATSABP3, BETA CARBONIC ANHYDRASE 1, F4P13.5, F4P13_5, SABP3, SALICYLIC ACID-BINDING PROTEIN 3, carbonic anhydrase 1","AT3G11410, AHG3, ARABIDOPSIS THALIANA PROTEIN PHOSPHATASE 2CA, ATPP2CA, protein phosphatase 2CA","AT3G11820, AT-SYR1, ATSYP121, ATSYR1, PEN1, PENETRATION1, SYNTAXIN RELATED PROTEIN 1, SYR1, syntaxin of plants 121","AT3G15730, PHOSPHOLIPASE D, PLD, phospholipase D alpha 1","AT3G45780, F16L2.3, JK224, NONPHOTOTROPIC HYPOCOTYL 1, NPH1, PHOTOTROPIN, ROOT PHOTOTROPISM 1, RPT1, phototropin 1","AT3G49220","AT3G51780, ATBAG4, BCL-2-associated athanogene 4","AT3G56480","AT4G01370, ATMPK4, F2N1.1, F2N1_1, MAP kinase 4, MAPK4","AT4G01680, AtMYB55, T15B16.4, T15B16_4, myb domain protein 55","AT4G03560, ATCCH1, ATTPC1, CALCIUM CHANNEL 1, FATTY ACID OXYGENATION UPREGULATED 2, FOU2, T5L23.5, two-pore  channel 1, two-pore channel 1","AT4G04740, ATCPK23, T4B21.15, T4B21_15, calcium-dependent protein kinase 23","AT4G04740, ATCPK23, T4B21.15, T4B21_15, calcium-dependent protein kinase 23","AT4G16110, ARR2, DL4095W, FCAALL.287, response regulator 2","AT4G18950, F13C5.120, F13C5_120","AT4G23650, AtCDPK6, CALCIUM-DEPENDENT PROTEIN KINASE 6, CPK3, Calcium dependent protein kinase 3, F9D16.120, F9D16_120, calcium-dependent protein kinase 6","AT4G26080, ABA INSENSITIVE 1, AtABI1, F20B18.190, F20B18_190, PROTEIN PHOSPHATASE 2C ABI1","AT4G33050, AtIQM1, F4I10.2, IQ-motif protein 1, IQM1, embryo sac development arrest 39","AT4G33950, ATOST1, F17I5.140, F17I5_140, OPEN STOMATA 1, P44, SNF1-RELATED PROTEIN KINASE 2.6, SNRK2-6, SNRK2.6, SRK2E, SUCROSE NONFERMENTING 1-RELATED PROTEIN KINASE 2-6","AT4G40100, PRS2-like protein 1, T5J17.2, T5J17_2","AT5G03280, ATEIN2, CKR1, CYTOKININ RESISTANT 1, ENHANCED RESPONSE TO ABA3, ERA3, ETHYLENE INSENSITIVE 2, F12E4.10, F12E4_10, ORE2, ORE3, ORESARA 2, ORESARA 3, PIR2","AT5G20090, AtMPC1, F28I16.240, F28I16_240, MPC1, mitochondrial pyruvate carrier 1","AT5G23720, MQM1.1, MQM1_1, PROPYZAMIDE-HYPERSENSITIVE 1","AT5G25980, BETA GLUCOSIDASE 37, BGLU37, T1N24.18, T1N24_18, glucoside glucohydrolase 2","AT5G26000, AtTGG1, BETA GLUCOSIDASE 38, BGLU38, THIOGLUCOSIDE GLUCOHYDROLASE, thioglucoside glucohydrolase 1","AT5G26660, ATMYB4, ATMYB4-old, ATMYB86, myb domain protein 4, myb domain protein 86","AT5G27620, F15A18.80, F15A18_80, cyclin H;1","AT5G44790, HMA7, K23L20.14, K23L20_14, RESPONSIVE-TO-ANTAGONIST 1","AT5G54270, LHCB3*1, MDK4.9, MDK4_9, light-harvesting chlorophyll B-binding protein 3","AT5G55630, ATKCO1, ATTPK1, CA2+ ACTIVATED OUTWARD RECTIFYING K+ CHANNEL 1, MDF20.7, MDF20_7, TANDEM PORE K+ CHANNEL 1, TPK1, TWO PORE K CHANNEL, TWO PORE K CHANNEL 1","AT1G08860, BONZAI 3, F7G19.25, F7G19_25","AT1G12480, CARBON DIOXIDE INSENSITIVE 3, CDI3, F5O11.23, F5O11_23, OZONE-SENSITIVE 1, RADICAL-INDUCED CELL DEATH 3, RCD3, SLAC1, SLOW ANION CHANNEL-ASSOCIATED 1","AT1G12480, CARBON DIOXIDE INSENSITIVE 3, CDI3, F5O11.23, F5O11_23, OZONE-SENSITIVE 1, RADICAL-INDUCED CELL DEATH 3, RCD3, SLAC1, SLOW ANION CHANNEL-ASSOCIATED 1","AT1G15520, ARABIDOPSIS THALIANA ATP-BINDING CASSETTE FAMILY G 40, ATABCG40, ATP-BINDING CASSETTE FAMILY G40, ATP-binding cassette G40, ATPDR12, Arabidopsis thaliana ATP-binding cassette G40, PDR12, PLEIOTROPIC DRUG RESISTANCE 12, T16N11.3, T16N11_3, pleiotropic drug resistance 12","AT1G25480, F2J7.18, F2J7_18","AT1G62580, T3P18.14, T3P18_14, nitric oxide-dependent guanylate cyclase 1","AT1G71010, F23N20.21, FORMS APLOID AND BINUCLEATE CELLS 1C","AT2G31870, F20M17.9, F20M17_9, PARG1, Sanskrit for 'bright', poly(ADP-ribose) glycohydrolase 1","AT2G39050, ArathEULS3, Euonymus lectin S3, T7F6.22, T7F6_22","AT2G41070, ATBZIP12, DPBF4, ENHANCED EM LEVEL, T3K9.16, T3K9_16","AT3G14270, FORMS APLOID AND BINUCLEATE CELLS 1B","AT3G58490, AtSPP1, LPPdelta, lipid phosphate phosphatase delta, sphingoid phosphate phosphatase 1","AT4G20260, ARABIDOPSIS THALIANA PLASMA-MEMBRANE ASSOCIATED CATION-BINDING PROTEIN 1, ATPCAP1, F1C12.180, F1C12_180, MDP25, microtubule-destabilizing protein 25, plasma-membrane associated cation-binding protein 1","AT4G29130, ARABIDOPSIS THALIANA HEXOKINASE 1, ATHXK1, F19B15.160, F19B15_160, GIN2, GLUCOSE INSENSITIVE 2, HEXOKINASE, hexokinase 1","AT5G02500, ARABIDOPSIS THALIANA HEAT SHOCK COGNATE PROTEIN 70-1, AT-HSC70-1, AtHsp70-1, HEAT SHOCK COGNATE PROTEIN 70, HEAT SHOCK PROTEIN 70-1, HSC70, HSP70-1, T22P11.90, T22P11_90, heat shock cognate protein 70-1","AT5G02800, CDG1-like 1, F9G14.110, F9G14_110","AT5G43410, MWF20.11, MWF20_11","AT5G48650, K15N18.17, K15N18_17","AT5G56030, AtHsp90.2, EARLY-RESPONSIVE TO DEHYDRATION 8, ERD8, HEAT SHOCK PROTEIN  90.2, HEAT SHOCK PROTEIN 81-2, HEAT SHOCK PROTEIN 90.2, HSP81.2, HSP90.2, MDA7.7, MDA7_7, heat shock protein 81-2, heat shock protein 81.2","AT5G64010, MBM17.11, MBM17_11","AT1G07000, ATEXO70B2, F10K1.28, F10K1_28, exocyst subunit exo70 family protein B2","AT1G12480, CARBON DIOXIDE INSENSITIVE 3, CDI3, F5O11.23, F5O11_23, OZONE-SENSITIVE 1, RADICAL-INDUCED CELL DEATH 3, RCD3, SLAC1, SLOW ANION CHANNEL-ASSOCIATED 1","AT1G23030, F19G10.3, F19G10_3","AT1G47128, F2G19.31, F2G19_31, RD21, RESPONSIVE TO DEHYDRATION 21A, responsive to dehydration 21, responsive to dehydration 21A","AT1G62400, F24O1.13, F24O1_13, high leaf temperature 1","AT2G05070, F1O13.20, F1O13_20, LHCB2, LIGHT-HARVESTING CHLOROPHYLL B-BINDING 2, photosystem II light harvesting complex gene 2.2","AT2G05100, F15L11.2, F15L11_2, LHCB2, LIGHT-HARVESTING CHLOROPHYLL B-BINDING 2, photosystem II light harvesting complex gene 2.1","AT2G26300, ARABIDOPSIS THALIANA G PROTEIN ALPHA SUBUNIT 1, ATGPA1, G PROTEIN ALPHA SUBUNIT, G PROTEIN ALPHA SUBUNIT 1, G protein alpha subunit 1, GPA1, T1D16.6, T1D16_6","AT2G26650, AKT1, ATAKT1, F18A8.2, F18A8_2, K+ transporter 1, POTASSIUM TRANSPORTER","AT2G31650, SDG27, SET DOMAIN PROTEIN 27, T9H9.17, T9H9_17, homologue of trithorax","AT2G40750, ATWRKY54, T7D17.7, T7D17_7, WRKY DNA-BINDING PROTEIN 54, WRKY DNA-binding protein 54","AT2G43790, ATMAPK6, ATMPK6, F18O19.10, MAP KINASE 6, MAP kinase 6, MAPK6","AT2G46070, ATMPK12, MAPK12, T3F17.28, mitogen-activated protein kinase 12","AT3G05010, T9J14.4, T9J14_4, candidate G-protein Coupled Receptor 2","AT3G05030, ATNHX2, T9J14.2, T9J14_2, sodium hydrogen exchanger 2","AT3G05030, ATNHX2, T9J14.2, T9J14_2, sodium hydrogen exchanger 2","AT3G16640, translationally controlled tumor protein","AT3G21220, ARABIDOPSIS THALIANA MITOGEN-ACTIVATED PROTEIN KINASE KINASE 5, ATMAP2K_ALPHA, ATMEK5, ATMKK5, MAP KINASE KINASE 5, MAP kinase kinase 5, MAP2K_A, MEK5","AT3G27690, LHCB2, LHCB2.4, LIGHT-HARVESTING CHLOROPHYLL B-BINDING 2, photosystem II light harvesting complex gene 2.3","AT3G49260, IQ-domain 21","AT3G50310, MAPKK kinase 20, MKKK20, mitogen-activated protein kinase kinase kinase 20","AT3G56400, ARABIDOPSIS THALIANA WRKY DNA-BINDING PROTEIN 70, ATWRKY70, WRKY DNA-binding protein 70","AT3G59700, ATHLECRK, L-type lectin receptor kinase V.5, LECRK1, LECTIN-RECEPTOR KINASE 1, LEGUME-LIKE LECTIN RECEPTOR KINASE-V.5, lectin-receptor kinase","AT3G59780","AT4G01370, ATMPK4, F2N1.1, F2N1_1, MAP kinase 4, MAPK4","AT4G20940, GUARD CELL HYDROGEN PEROXIDE-RESISTANT 1, T13K14.100, T13K14_100","AT4G22330, T10I14.160, T10I14_160","AT4G33950, ATOST1, F17I5.140, F17I5_140, OPEN STOMATA 1, P44, SNF1-RELATED PROTEIN KINASE 2.6, SNRK2-6, SNRK2.6, SRK2E, SUCROSE NONFERMENTING 1-RELATED PROTEIN KINASE 2-6","AT4G35790, ARABIDOPSIS THALIANA PHOSPHOLIPASE D DELTA, ATPLDDELTA, F4B14.60, F4B14_60, PHOSPHOLIPASE D, phospholipase D delta","AT5G10720, AHK5, CKI2, CYTOKININ INDEPENDENT 2, MAJ23.80, MAJ23_80, histidine kinase 5","AT5G13740, MSH12.21, MSH12_21, zinc induced facilitator 1","AT5G13750, MXE10.2, MXE10_2, zinc induced facilitator-like 1","AT5G13750, MXE10.2, MXE10_2, zinc induced facilitator-like 1","AT5G23060, MYJ24.5, MYJ24_5, calcium sensing receptor","AT5G23060, MYJ24.5, MYJ24_5, calcium sensing receptor","AT5G27150, AT-NHX1, ATNHX, ATNHX1, NA(+)/H(+) ANTIPORTER, Na+/H+ exchanger 1, T21B4.60, T21B4_60","AT5G27150, AT-NHX1, ATNHX, ATNHX1, NA(+)/H(+) ANTIPORTER, Na+/H+ exchanger 1, T21B4.60, T21B4_60","AT5G49760, K2I5.13, K2I5_13","AT5G58430, ATEXO70B1, MQJ2.2, MQJ2_2, exocyst subunit exo70 family protein B1","AT1G04120, ARABIDOPSIS THALIANA ATP BINDING CASSETTE TRANSPORTER C5, ATABCC5, ATMRP5, ATP BINDING CASSETTE TRANSPORTER C5, ATP-binding cassette C5, Arabidopsis thaliana ATP-binding cassette C5, MULTIDRUG RESISTANCE PROTEIN 5, multidrug resistance-associated protein 5","AT1G55660, F20N2.9","AT3G09770, ABA insensitive RING protein 3, AIRP3, AtAIRP3, F11F8.36, LOSS OF GDU 2","AT3G46060, ARA-3, ARA3, ATRAB8A, ATRABE1C, RAB GTPase homolog 8A, RAB8A, SMALL GTP-BINDING PROTEIN","AT3G50360, ATCEN2, CEN1, CENTRIN 1, centrin2","AT4G20940, GUARD CELL HYDROGEN PEROXIDE-RESISTANT 1, T13K14.100, T13K14_100","AT5G05860, MJJ3.28, MJJ3_28, UDP-glucosyl transferase 76C2","AT4G20940, GUARD CELL HYDROGEN PEROXIDE-RESISTANT 1, T13K14.100, T13K14_100","AT5G49760, K2I5.13, K2I5_13","AT1G12480, CARBON DIOXIDE INSENSITIVE 3, CDI3, F5O11.23, F5O11_23, OZONE-SENSITIVE 1, RADICAL-INDUCED CELL DEATH 3, RCD3, SLAC1, SLOW ANION CHANNEL-ASSOCIATED 1","AT2G17290, ARABIDOPSIS THALIANA CALCIUM-DEPENDENT PROTEIN KINASE 6, ARABIDOPSIS THALIANA CALMODULIN-DOMAIN PROTEIN KINASE 3, ATCDPK3, ATCPK6, CALCIUM-DEPENDENT PROTEIN KINASE 6, CALMODULIN-DOMAIN PROTEIN KINASE 3, F5J6.13, F5J6_13, calcium dependent protein kinase 6","AT4G14480, BLUE LIGHT SIGNALING1, BLUS1, DL3280C, FCAALL.219","AT4G22790, T12H17.180, T12H17_180","AT4G22790, T12H17.180, T12H17_180","AT4G33950, ATOST1, F17I5.140, F17I5_140, OPEN STOMATA 1, P44, SNF1-RELATED PROTEIN KINASE 2.6, SNRK2-6, SNRK2.6, SRK2E, SUCROSE NONFERMENTING 1-RELATED PROTEIN KINASE 2-6","AT5G22920, AtRZPF34, MRN17.15, MRN17_15, RING zinc-finger protein 34, RZPF34","AT5G22920, AtRZPF34, MRN17.15, MRN17_15, RING zinc-finger protein 34, RZPF34","AT5G46220, MDE13.4, MDE13_4","AT5G57050, ABA INSENSITIVE 2, AtABI2, MHM17.19, MHM17_19, PROTEIN PHOSPHATASE 2C","AT1G05100, T7A14.2, T7A14_2, mitogen-activated protein kinase kinase kinase 18","AT1G17280, F20D23.1, F20D23_1, ubiquitin-conjugating enzyme 34","AT3G17000, ubiquitin-conjugating enzyme 32","AT5G50430, MXI22.15, MXI22_15, ubiquitin-conjugating enzyme 33","AT2G20890, F5H14.14, F5H14_14, THF1, THYLAKOID FORMATION1, photosystem II reaction center PSB29 protein","AT2G28930, APK1B, T9I4.1, T9I4_1, protein kinase 1B","AT5G52440, HIGH CHLOROPHYLL FLUORESCENCE 106, K24M7.19, K24M7_19","AT1G04120, ARABIDOPSIS THALIANA ATP BINDING CASSETTE TRANSPORTER C5, ATABCC5, ATMRP5, ATP BINDING CASSETTE TRANSPORTER C5, ATP-binding cassette C5, Arabidopsis thaliana ATP-binding cassette C5, MULTIDRUG RESISTANCE PROTEIN 5, multidrug resistance-associated protein 5","AT2G18960, AHA1, F19F24.16, F19F24_16, H(+)-ATPase 1, OPEN STOMATA 2, OST2, PLASMA MEMBRANE PROTON ATPASE, PMA","AT5G27620, F15A18.80, F15A18_80, cyclin H;1","AT5G40280, ARABIDOPSIS THALIANA FARNESYL TRANSFERASE BETA SUBUNIT, ATFTB, ENHANCED RESPONSE TO ABA 1, FARNESYL TRANSFERASE BETA SUBUNIT, MSN9.180, MSN9_180, WIG, WIGGUM","AT1G04110, AtSDD1, F20D22.12, F20D22_12, STOMATAL DENSITY AND DISTRIBUTION, STOMATAL DENSITY AND DISTRIBUTION 1","AT1G63700, EMB71, EMBRYO DEFECTIVE 71, F24D7.11, F24D7_11, MAP KINASE KINASE KINASE 4, MAPKKK4, YODA","AT1G75640, F10A5.16, F10A5_16","AT1G80080, AtRLP17, F18B13.16, F18B13_16, Receptor Like Protein 17, TOO MANY MOUTHS","AT2G26330, ERECTA, QRP1, QUANTITATIVE RESISTANCE TO PLECTOSPHAERELLA 1, T1D16.3, T1D16_3","AT3G61650, gamma-tubulin","AT3G63440, ATCKX6, ATCKX7, CYTOKININ OXIDASE 6, cytokinin oxidase/dehydrogenase 6","AT5G05620, ARABIDOPSIS THALIANA GAMMA-TUBULIN  COMPLEX PROTEIN 2, ARABIDOPSIS THALIANA GAMMA-TUBULIN COMPLEX PROTEIN 2, ATGCP2, GAMMA-TUBULIN 2, MJJ3.10, MJJ3_10, TUBG2, gamma-tubulin  complex protein 2, gamma-tubulin complex protein 2","AT5G07180, ERECTA-like 2, T28J14.120, T28J14_120","AT5G62230, ERECTA-like 1, MMI9.14, MMI9_14","AT1G09470, F14J9.13, F14J9_13","AT1G32640, ATMYC2, F6N18.4, F6N18_4, JAI1, JASMONATE INSENSITIVE 1, JIN1, RD22BP1, ZBF1","AT1G34245, EPIDERMAL PATTERNING FACTOR 2","AT1G67040, F1O19.10, F1O19_10, TON1 Recruiting Motif 22","AT1G71866","AT1G80133","AT1G80370, Cyclin A2;4, F5I6.12, F5I6_12","AT2G05760, NAT1, T25M19.4, T25M19_4, nucleobase ascorbate transporter 1","AT2G15430, F26H6.5, F26H6_5, NRPD3, NRPE3A, RBP36A, RPB35.5A","AT2G16630, T24I21.4, T24I21_4","AT2G18790, HY3, MSF3.17, MSF3_17, OOP1, OUT OF PHASE 1, PHYTOCHROME B, phytochrome B","AT2G20875, EPIDERMAL PATTERNING FACTOR 1","AT2G30370, CHALLAH, EPF1-like 6, EPFL6, T9D9.18, T9D9_18","AT2G38160, F16M14.9, F16M14_9","AT2G42610, LIGHT SENSITIVE HYPOCOTYLS 10","AT3G02120, F1C9.2","AT3G06120, F28L1.6, F28L1_6","AT3G06120, F28L1.6, F28L1_6","AT3G07320, T1B9.1","AT3G20940, ''cytochrome P450, cytochrome P450, family 705, polypeptide 30, polypeptide 30'', subfamily A","AT3G22820, CHALLAH-LIKE 1, EPFL5, epidermal patterning factor like 5","AT3G24140, FAMA","AT3G44960","AT3G52110","AT3G61610, F15G16.1","AT4G12540, T1P17.130, T1P17_130","AT4G12970, EPFL9, F25G13.60, F25G13_60","AT4G14723, CHALLAH-LIKE 2, EPFL4, epidermal patterning factor like 4","AT4G17880, T6K21.60, T6K21_60","AT4G36180, F23E13.70, F23E13_70","AT4G37810","AT5G01910, T20L15.180, T20L15_180","AT5G10310, F18D22.80, F18D22_80","AT5G46760, MZA15.18, MZA15_18","AT5G53210, MFH8.15, SPEECHLESS","AT5G53210, MFH8.15, SPEECHLESS","AT5G60880, BREAKING OF ASYMMETRY IN THE STOMATAL LINEAGE, MAE1.13, MAE1_13","AT5G62710, MQB2.1, MQB2_1","AT5G66230, K2A18.31, K2A18_31","AT1G14350, AtMYB124, F14L17.12, F14L17_12, FOUR LIPS, MYB124, myb domain protein 124","AT1G14350, AtMYB124, F14L17.12, F14L17_12, FOUR LIPS, MYB124, myb domain protein 124","AT1G80080, AtRLP17, F18B13.16, F18B13_16, Receptor Like Protein 17, TOO MANY MOUTHS","AT2G02820, AtMYB88, T20F6.4, T20F6_4, myb domain protein 88","AT2G46410, CAPRICE, F11C10.10, MYB FAMILY TRANSCRIPTION FACTOR CPC","AT3G54180, CDC2-LIKE GENE, CDC2B, CYCLIN-DEPENDENT KINASE B1;1, P34(CDC2)-LIKE PROTEIN, cyclin-dependent kinase B1;1","AT3G54180, CDC2-LIKE GENE, CDC2B, CYCLIN-DEPENDENT KINASE B1;1, P34(CDC2)-LIKE PROTEIN, cyclin-dependent kinase B1;1","AT2G40180, ATHPP2C5, T7M7.17, phosphatase 2C5","AT3G22760","AT3G26744, A. THALIANA INDUCER OF CBP EXPRESSION 1, ATICE1, INDUCER OF CBF EXPRESSION 1, SCREAM, SCRM","AT3G57230, AGAMOUS-like 16","AT4G14770, ATTCX2, DL3425C, FCAALL.306, TESMIN/TSO1-LIKE CXC 2, TESMIN/TSO1-like CXC 2","AT5G10440, F12B17.210, F12B17_210, cyclin d4;2","AT5G65420, CYCLIN D4;1, MNA5.15, MNA5_15","AT1G05100, T7A14.2, T7A14_2, mitogen-activated protein kinase kinase kinase 18","AT1G20160, T20H2.6, T20H2_6","AT1G33240, AT-GTL1, AT-GTL2, ATGTL1, GT-2-like 1, GT2-LIKE 1, GT2-LIKE 2, T9L6.10, T9L6_10","AT1G51660, ARABIDOPSIS THALIANA MITOGEN-ACTIVATED PROTEIN KINASE KINASE 4, ATMEK4, ATMKK4, F19C24.26, F19C24_26, MAP KINASE KINASE 4, mitogen-activated protein kinase kinase 4","AT2G43790, ATMAPK6, ATMPK6, F18O19.10, MAP KINASE 6, MAP kinase 6, MAPK6","AT3G45640, ATMAPK3, ATMPK3, T6D9.4, mitogen-activated protein kinase 3","AT4G12970, EPFL9, F25G13.60, F25G13_60","AT5G53210, MFH8.15, SPEECHLESS","AT1G20160, T20H2.6, T20H2_6","AT1G25250, AtIDD16, F4F7.36, F4F7_36, indeterminate(ID)-domain 16","AT1G34245, EPIDERMAL PATTERNING FACTOR 2","AT1G70410, ATBCA4, BETA CARBONIC ANHYDRASE 4, CA4, F17O7.5, F17O7_5, beta carbonic anhydrase 4","AT2G20875, EPIDERMAL PATTERNING FACTOR 1","AT2G30370, CHALLAH, EPF1-like 6, EPFL6, T9D9.18, T9D9_18","AT2G30370, CHALLAH, EPF1-like 6, EPFL6, T9D9.18, T9D9_18","AT3G01500, ARABIDOPSIS THALIANA SALICYLIC ACID-BINDING PROTEIN 3, ATBCA1, ATSABP3, BETA CARBONIC ANHYDRASE 1, F4P13.5, F4P13_5, SABP3, SALICYLIC ACID-BINDING PROTEIN 3, carbonic anhydrase 1","AT1G15570, CYCLIN A2;3, T16N11.8, T16N11_8","AT4G12970, EPFL9, F25G13.60, F25G13_60","AT5G11300, CYC2BAT, CYCA2;2, CYCLIN, CYCLIN A2;2, mitotic-like cyclin 3B from Arabidopsis","AT1G14350, AtMYB124, F14L17.12, F14L17_12, FOUR LIPS, MYB124, myb domain protein 124","AT1G14350, AtMYB124, F14L17.12, F14L17_12, FOUR LIPS, MYB124, myb domain protein 124","AT1G34245, EPIDERMAL PATTERNING FACTOR 2","AT1G34245, EPIDERMAL PATTERNING FACTOR 2","AT1G71866","AT1G71866","AT1G80133","AT1G80133","AT2G02820, AtMYB88, T20F6.4, T20F6_4, myb domain protein 88","AT2G20875, EPIDERMAL PATTERNING FACTOR 1","AT2G30370, CHALLAH, EPF1-like 6, EPFL6, T9D9.18, T9D9_18","AT2G30370, CHALLAH, EPF1-like 6, EPFL6, T9D9.18, T9D9_18","AT3G06120, F28L1.6, F28L1_6","AT3G13898","AT3G22820, CHALLAH-LIKE 1, EPFL5, epidermal patterning factor like 5","AT3G22820, CHALLAH-LIKE 1, EPFL5, epidermal patterning factor like 5","AT3G24140, FAMA","AT3G24140, FAMA","AT4G12970, EPFL9, F25G13.60, F25G13_60","AT4G14723, CHALLAH-LIKE 2, EPFL4, epidermal patterning factor like 4","AT4G14723, CHALLAH-LIKE 2, EPFL4, epidermal patterning factor like 4","AT4G37810","AT4G37810","AT5G10310, F18D22.80, F18D22_80","AT5G10310, F18D22.80, F18D22_80","AT5G53210, MFH8.15, SPEECHLESS","AT5G65590, K21L13.10, K21L13_10, SCAP1, STOMATAL CARPENTER 1","AT1G14350, AtMYB124, F14L17.12, F14L17_12, FOUR LIPS, MYB124, myb domain protein 124","AT1G49040, F27J15.17, F27J15_17, STOMATAL CYTOKINESIS-DEFECTIVE 1","AT2G02820, AtMYB88, T20F6.4, T20F6_4, myb domain protein 88","AT3G22780, ATTSO1, CHINESE FOR 'UGLY'","AT3G48750, CDC2A, CDC2AAT, CDK2, CDKA1, CDKA;1, CYCLIN-DEPENDENT KINASE A;1, P34CDC2, cell division control 2","AT1G12860, F13K23.12, F13K23_12, ICE2, INDUCER OF CBF EXPRESSION 2, SCREAM 2","AT1G14350, AtMYB124, F14L17.12, F14L17_12, FOUR LIPS, MYB124, myb domain protein 124","AT1G15570, CYCLIN A2;3, T16N11.8, T16N11_8","AT2G02820, AtMYB88, T20F6.4, T20F6_4, myb domain protein 88","AT2G38620, CYCLIN-DEPENDENT KINASE B1;2, T6A23.18, T6A23_18, cyclin-dependent kinase B1;2","AT3G24140, FAMA","AT3G48750, CDC2A, CDC2AAT, CDK2, CDKA1, CDKA;1, CYCLIN-DEPENDENT KINASE A;1, P34CDC2, cell division control 2","AT3G50070, CYCLIN D3;3","AT3G54180, CDC2-LIKE GENE, CDC2B, CYCLIN-DEPENDENT KINASE B1;1, P34(CDC2)-LIKE PROTEIN, cyclin-dependent kinase B1;1","AT4G34160, CYCD3, CYCLIN D3;1, F28A23.80, F28A23_80","AT5G67260, CYCLIN D3;2, K3G17.2, K3G17_2","AT3G12280, ATRBR1, RB, RB1, RBR, RETINOBLASTOMA 1, RETINOBLASTOMA PROTEIN, RETINOBLASTOMA-RELATED, RETINOBLASTOMA-RELATED PROTEIN 1, retinoblastoma-related 1","AT3G24140, FAMA","AT1G27695","AT1G18580, F25I16.8, F25I16_8, galacturonosyltransferase 11","AT2G20810, F5H14.44, LGT4, galacturonosyltransferase 10","AT4G26690, F10M23.30, F10M23_30, GDPDL3, GLYCEROPHOSPHODIESTERASE-LIKE 2, GPDL2, Glycerophosphodiester phosphodiesterase (GDPD) like 3, MRH5, MUTANT ROOT HAIR 5, SHAVEN 3","AT5G55480, GDPDL4, GPDL1, Glycerophosphodiester phosphodiesterase (GDPD) like 4, MTE17.19, MTE17_19, SHV3-like 1, glycerophosphodiesterase-like 1","AT1G08750, F22O13.24, F22O13_24","AT1G80080, AtRLP17, F18B13.16, F18B13_16, Receptor Like Protein 17, TOO MANY MOUTHS","AT1G80180, F18B13.26, F18B13_26","AT2G15430, F26H6.5, F26H6_5, NRPD3, NRPE3A, RBP36A, RPB35.5A","AT2G17820, AHK1, ATHK1, T13L16.16, T13L16_16, histidine kinase 1","AT2G20875, EPIDERMAL PATTERNING FACTOR 1","AT3G22760","AT3G59350","AT4G12970, EPFL9, F25G13.60, F25G13_60","AT4G12970, EPFL9, F25G13.60, F25G13_60","AT4G14770, ATTCX2, DL3425C, FCAALL.306, TESMIN/TSO1-LIKE CXC 2, TESMIN/TSO1-like CXC 2","AT5G08120, ATMBP2C, MBP2C, MICROTUBULE BINDING PROTEIN 2C, movement protein binding protein 2C","AT1G14350, AtMYB124, F14L17.12, F14L17_12, FOUR LIPS, MYB124, myb domain protein 124","AT1G33240, AT-GTL1, AT-GTL2, ATGTL1, GT-2-like 1, GT2-LIKE 1, GT2-LIKE 2, T9L6.10, T9L6_10","AT1G51660, ARABIDOPSIS THALIANA MITOGEN-ACTIVATED PROTEIN KINASE KINASE 4, ATMEK4, ATMKK4, F19C24.26, F19C24_26, MAP KINASE KINASE 4, mitogen-activated protein kinase kinase 4","AT2G02820, AtMYB88, T20F6.4, T20F6_4, myb domain protein 88","AT2G02820, AtMYB88, T20F6.4, T20F6_4, myb domain protein 88","AT2G38620, CYCLIN-DEPENDENT KINASE B1;2, T6A23.18, T6A23_18, cyclin-dependent kinase B1;2","AT2G43790, ATMAPK6, ATMPK6, F18O19.10, MAP KINASE 6, MAP kinase 6, MAPK6","AT3G21220, ARABIDOPSIS THALIANA MITOGEN-ACTIVATED PROTEIN KINASE KINASE 5, ATMAP2K_ALPHA, ATMEK5, ATMKK5, MAP KINASE KINASE 5, MAP kinase kinase 5, MAP2K_A, MEK5","AT3G45640, ATMAPK3, ATMPK3, T6D9.4, mitogen-activated protein kinase 3","AT3G54180, CDC2-LIKE GENE, CDC2B, CYCLIN-DEPENDENT KINASE B1;1, P34(CDC2)-LIKE PROTEIN, cyclin-dependent kinase B1;1","AT5G05660, ATNFXL2, Arabidopsis NF-X like 2, EARLY BIRD, EBI, MJJ3.6, MJJ3_6, NFX1-like 2"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>BP_ID<\/th>\n      <th>GOTerm<\/th>\n      <th>Term<\/th>\n      <th>TAIR<\/th>\n      <th>Evidence<\/th>\n      <th>ENTREZ<\/th>\n      <th>Gene_Name<\/th>\n      <th>Gene_Definition<\/th>\n      <th>Gene_Aliases<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"Blfrtip","buttons":["copy","csv","excel","pdf","print"],"columnDefs":[{"className":"dt-right","targets":5}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[2]; $(this.api().cell(row, 2).node()).css({'font-weight':'bold'});\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
+</div>
+</div>
+<div id="references" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-Ashburner2000" class="csl-entry">
+<span class="smallcaps">Ashburner, M.</span>, <span class="smallcaps">C.A. Ball</span>, <span class="smallcaps">J.A. Blake</span>, <span class="smallcaps">D. Botstein</span>, <span class="smallcaps">H. Butler</span>, <span class="smallcaps">J.M. Cherry</span>, <span class="smallcaps">A.P. Davis</span>, et al. 2000. Gene ontology: Tool for the unification of biology. <em>Nature Genetics</em> 25: 25–29. Available at: <a href="https://doi.org/10.1038/75556">https://doi.org/10.1038/75556</a>.
+</div>
+<div id="ref-GOconso2020" class="csl-entry">
+<span class="smallcaps">Consortium, T.G.O.</span> 2020. <span class="nocase">The Gene Ontology resource: enriching a GOld mine</span>. <em>Nucleic Acids Research</em> 49: D325–D334. Available at: <a href="https://doi.org/10.1093/nar/gkaa1113">https://doi.org/10.1093/nar/gkaa1113</a>.
+</div>
+</div>
+</div>
+<div id="appendix-1" class="section level1 appendix" number="5">
+<h1><span class="header-section-number">5</span> Appendix 1</h1>
+<p>Citations of all R packages used to generate this report.</p>
+<p>[1] J. Allaire, Y. Xie, J. McPherson, et al. <em>rmarkdown: Dynamic
+Documents for R</em>. R package version 2.14. 2022.
+<a href="https://CRAN.R-project.org/package=rmarkdown" class="uri">https://CRAN.R-project.org/package=rmarkdown</a>.</p>
+<p>[2] D. Bates, M. Maechler, and M. Jagan. <em>Matrix: Sparse and Dense
+Matrix Classes and Methods</em>. R package version 1.4-1. 2022.
+<a href="https://CRAN.R-project.org/package=Matrix" class="uri">https://CRAN.R-project.org/package=Matrix</a>.</p>
+<p>[3] C. Boettiger. <em>knitcitations: Citations for Knitr Markdown Files</em>.
+R package version 1.0.12. 2021.
+<a href="https://github.com/cboettig/knitcitations" class="uri">https://github.com/cboettig/knitcitations</a>.</p>
+<p>[4] M. Carlson. <em>GO.db: A set of annotation maps describing the entire
+Gene Ontology</em>. R package version 3.15.0. 2022.</p>
+<p>[5] M. Carlson. <em>org.At.tair.db: Genome wide annotation for
+Arabidopsis</em>. R package version 3.15.1. 2022.</p>
+<p>[6] G. Csardi and T. Nepusz. “The igraph software package for complex
+network research”. In: <em>InterJournal</em> Complex Systems (2006), p. 1695.
+<a href="https://igraph.org" class="uri">https://igraph.org</a>.</p>
+<p>[7] S. Falcon and R. Gentleman. “Using GOstats to test gene lists for
+GO term association.” In: <em>Bioinformatics</em> 23.2 (2007), pp. 257-8.</p>
+<p>[8] S. A. file. <em>igraph: Network Analysis and Visualization</em>. R package
+version 1.3.2. 2022. <a href="https://CRAN.R-project.org/package=igraph" class="uri">https://CRAN.R-project.org/package=igraph</a>.</p>
+<p>[9] R. Gentleman. <em>annotate: Annotation for microarrays</em>. R package
+version 1.74.0. 2022.</p>
+<p>[10] R. Gentleman. <em>Category: Category Analysis</em>. R package version
+2.62.0. 2022.</p>
+<p>[11] R. Gentleman. <em>GOstats: Tools for manipulating GO and
+microarrays</em>. R package version 2.62.0. 2022.</p>
+<p>[12] R. Gentleman, V. Carey, M. Morgan, et al. <em>Biobase: Base functions
+for Bioconductor</em>. R package version 2.56.0. 2022.
+<a href="https://bioconductor.org/packages/Biobase" class="uri">https://bioconductor.org/packages/Biobase</a>.</p>
+<p>[13] R. Gentleman, E. Whalen, W. Huber, et al. <em>graph: A package to
+handle graph data structures</em>. R package version 1.74.0. 2022.</p>
+<p>[14] K. D. Hansen, J. Gentry, L. Long, et al. <em>Rgraphviz: Provides
+plotting capabilities for R graph objects</em>. R package version 2.41.1.
+2022.</p>
+<p>[15] W. Huber, V. J. Carey, R. Gentleman, et al. “Orchestrating
+high-throughput genomic analysis with Bioconductor”. In: <em>Nature
+Methods</em> 12.2 (2015), pp. 115-121.
+<a href="http://www.nature.com/nmeth/journal/v12/n2/full/nmeth.3252.html" class="uri">http://www.nature.com/nmeth/journal/v12/n2/full/nmeth.3252.html</a>.</p>
+<p>[16] Huber, W., Carey, et al. “Orchestrating high-throughput genomic
+analysis with Bioconductor”. In: <em>Nature Methods</em> 12.2 (2015), pp.
+115-121.
+<a href="http://www.nature.com/nmeth/journal/v12/n2/full/nmeth.3252.html" class="uri">http://www.nature.com/nmeth/journal/v12/n2/full/nmeth.3252.html</a>.</p>
+<p>[17] M. C. Koohafkan. <em>kfigr: Integrated Code Chunk Anchoring and
+Referencing for R Markdown Documents</em>. R package version 1.2.1. 2021.
+<a href="https://github.com/mkoohafkan/kfigr" class="uri">https://github.com/mkoohafkan/kfigr</a>.</p>
+<p>[18] M. Lawrence, W. Huber, H. Pagès, et al. “Software for Computing
+and Annotating Genomic Ranges”. In: <em>PLoS Computational Biology</em> 9 (8
+2013). DOI: 10.1371/journal.pcbi.1003118.
+<a href="http://www.ploscompbiol.org/article/info%3Adoi%2F10.1371%2Fjournal.pcbi.1003118%7D." class="uri">http://www.ploscompbiol.org/article/info%3Adoi%2F10.1371%2Fjournal.pcbi.1003118}.</a></p>
+<p>[19] H. Pagès, P. Aboyoun, and M. Lawrence. <em>IRanges: Foundation of
+integer range manipulation in Bioconductor</em>. R package version 2.30.0.
+2022. <a href="https://bioconductor.org/packages/IRanges" class="uri">https://bioconductor.org/packages/IRanges</a>.</p>
+<p>[20] H. Pagès, M. Carlson, S. Falcon, et al. <em>AnnotationDbi:
+Manipulation of SQLite-based annotations in Bioconductor</em>. R package
+version 1.58.0. 2022.
+<a href="https://bioconductor.org/packages/AnnotationDbi" class="uri">https://bioconductor.org/packages/AnnotationDbi</a>.</p>
+<p>[21] H. Pagès, M. Lawrence, and P. Aboyoun. <em>S4Vectors: Foundation of
+vector-like and list-like containers in Bioconductor</em>. R package
+version 0.34.0. 2022. <a href="https://bioconductor.org/packages/S4Vectors" class="uri">https://bioconductor.org/packages/S4Vectors</a>.</p>
+<p>[22] R Core Team. <em>R: A Language and Environment for Statistical
+Computing</em>. R Foundation for Statistical Computing. Vienna, Austria,
+2022. <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a>.</p>
+<p>[23] T. B. D. Team. <em>BiocGenerics: S4 generic functions used in
+Bioconductor</em>. R package version 0.42.0. 2022.
+<a href="https://bioconductor.org/packages/BiocGenerics" class="uri">https://bioconductor.org/packages/BiocGenerics</a>.</p>
+<p>[24] D. Temple Lang. <em>XML: Tools for Parsing and Generating XML Within
+R and S-Plus</em>. R package version 3.99-0.10. 2022.
+<a href="http://www.omegahat.net/RSXML/" class="uri">http://www.omegahat.net/RSXML/</a>.</p>
+<p>[25] H. Wickham. <em>ggplot2: Elegant Graphics for Data Analysis</em>.
+Springer-Verlag New York, 2016. ISBN: 978-3-319-24277-4.
+<a href="https://ggplot2.tidyverse.org" class="uri">https://ggplot2.tidyverse.org</a>.</p>
+<p>[26] H. Wickham, J. Bryan, and M. Barrett. <em>usethis: Automate Package
+and Project Setup</em>. R package version 2.1.6. 2022.
+<a href="https://CRAN.R-project.org/package=usethis" class="uri">https://CRAN.R-project.org/package=usethis</a>.</p>
+<p>[27] H. Wickham, W. Chang, L. Henry, et al. <em>ggplot2: Create Elegant
+Data Visualisations Using the Grammar of Graphics</em>. R package version
+3.3.6. 2022. <a href="https://CRAN.R-project.org/package=ggplot2" class="uri">https://CRAN.R-project.org/package=ggplot2</a>.</p>
+<p>[28] H. Wickham, R. François, L. Henry, et al. <em>dplyr: A Grammar of
+Data Manipulation</em>. R package version 1.0.9. 2022.
+<a href="https://CRAN.R-project.org/package=dplyr" class="uri">https://CRAN.R-project.org/package=dplyr</a>.</p>
+<p>[29] H. Wickham, J. Hester, W. Chang, et al. <em>devtools: Tools to Make
+Developing R Packages Easier</em>. R package version 2.4.3. 2021.
+<a href="https://CRAN.R-project.org/package=devtools" class="uri">https://CRAN.R-project.org/package=devtools</a>.</p>
+<p>[30] D. Winter. <em>rentrez: Entrez in R</em>. R package version 1.2.3. 2020.
+<a href="https://CRAN.R-project.org/package=rentrez" class="uri">https://CRAN.R-project.org/package=rentrez</a>.</p>
+<p>[31] D. J. Winter. “rentrez: an R package for the NCBI eUtils API”. In:
+<em>The R Journal</em> 9 (2 2017), pp. 520-526.</p>
+<p>[32] Y. Xie. <em>bookdown: Authoring Books and Technical Documents with R
+Markdown</em>. ISBN 978-1138700109. Boca Raton, Florida: Chapman and
+Hall/CRC, 2016. <a href="https://bookdown.org/yihui/bookdown" class="uri">https://bookdown.org/yihui/bookdown</a>.</p>
+<p>[33] Y. Xie. <em>bookdown: Authoring Books and Technical Documents with R
+Markdown</em>. R package version 0.27. 2022.
+<a href="https://CRAN.R-project.org/package=bookdown" class="uri">https://CRAN.R-project.org/package=bookdown</a>.</p>
+<p>[34] Y. Xie. <em>Dynamic Documents with R and knitr</em>. 2nd. ISBN
+978-1498716963. Boca Raton, Florida: Chapman and Hall/CRC, 2015.
+<a href="https://yihui.org/knitr/" class="uri">https://yihui.org/knitr/</a>.</p>
+<p>[35] Y. Xie. <em>formatR: Format R Code Automatically</em>. R package version
+1.12. 2022. <a href="https://github.com/yihui/formatR" class="uri">https://github.com/yihui/formatR</a>.</p>
+<p>[36] Y. Xie. “knitr: A Comprehensive Tool for Reproducible Research in
+R”. In: <em>Implementing Reproducible Computational Research</em>. Ed. by V.
+Stodden, F. Leisch and R. D. Peng. ISBN 978-1466561595. Chapman and
+Hall/CRC, 2014. <a href="http://www.crcpress.com/product/isbn/9781466561595" class="uri">http://www.crcpress.com/product/isbn/9781466561595</a>.</p>
+<p>[37] Y. Xie. <em>knitr: A General-Purpose Package for Dynamic Report
+Generation in R</em>. R package version 1.39. 2022.
+<a href="https://yihui.org/knitr/" class="uri">https://yihui.org/knitr/</a>.</p>
+<p>[38] Y. Xie, J. Allaire, and G. Grolemund. <em>R Markdown: The Definitive
+Guide</em>. ISBN 9781138359338. Boca Raton, Florida: Chapman and Hall/CRC,
+2018. <a href="https://bookdown.org/yihui/rmarkdown" class="uri">https://bookdown.org/yihui/rmarkdown</a>.</p>
+<p>[39] Y. Xie, J. Cheng, and X. Tan. <em>DT: A Wrapper of the JavaScript
+Library DataTables</em>. R package version 0.23. 2022.
+<a href="https://github.com/rstudio/DT" class="uri">https://github.com/rstudio/DT</a>.</p>
+<p>[40] Y. Xie, C. Dervieux, and E. Riederer. <em>R Markdown Cookbook</em>. ISBN
+9780367563837. Boca Raton, Florida: Chapman and Hall/CRC, 2020.
+<a href="https://bookdown.org/yihui/rmarkdown-cookbook" class="uri">https://bookdown.org/yihui/rmarkdown-cookbook</a>.</p>
+<p>[41] L. Yan. <em>ggvenn: Draw Venn Diagram by ggplot2</em>. R package version
+0.1.9. 2022.</p>
+<p>[42] H. Zhu. <em>kableExtra: Construct Complex Table with kable and Pipe
+Syntax</em>. R package version 1.3.4. 2021.
+<a href="https://CRAN.R-project.org/package=kableExtra" class="uri">https://CRAN.R-project.org/package=kableExtra</a>.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

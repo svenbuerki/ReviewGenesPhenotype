@@ -38,17 +38,22 @@ library(devtools)
 library(kfigr)
 library(dplyr)
 library(kableExtra)
-library(tufte)
-require(leaflet)
+#library(tufte)
+#require(leaflet)
 library(tools)
 library(rentrez)
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 BiocManager::install(c("DECIPHER", "Rgraphviz"))
-library(DECIPHER)
+#library(DECIPHER)
 library(Rgraphviz)
 library(annotate)
+library(org.At.tair.db)
+library(GOstats)
+library("GO.db")
 library(igraph)
+library(ggvenn)
+
 library(DT)
 #if (!require(devtools)) install.packages("devtools")
 #devtools::install_github("yanlinlin82/ggvenn")
@@ -60,7 +65,7 @@ knitr::write_bib(.packages(), file = 'packages.bib')
 # Identify genes controlling target phenotype
 
 - **Challenge:** Identifying all the genes controlling a target phenotype is challenging, but it is fundamental to our understanding of the contribution of genetics (vs. phenotypic plasticity) in explaining an organism's response to environmental changes.
-- **Solution:** Gene ontology (GO) terms and more specifically those associated to biological processes (BP) provide a framework to querying for specific phenotypes (here stomata). Once identified, GO terms can be extracted and graphed and their associated genes recovered for model species (here *Arabidopsis thaliana*; hereafter At).
+- **Solution:** Gene ontology (GO) terms [@Ashburner2000; @GOconso2020] and more specifically those associated to biological processes (BP) provide a framework to querying for specific phenotypes (here stomata). Once identified, GO terms can be extracted and graphed and their associated genes recovered for model species (here *Arabidopsis thaliana*; hereafter At).
 
 # Bioinformatic pipeline
 
@@ -77,6 +82,7 @@ library(annotate)
 library(igraph)
 library(Rgraphviz)
 library(ggvenn)
+library(rentrez)
 ```
 
 ## Annotate all GO terms in the org.At.tair.db 
@@ -301,6 +307,8 @@ md5CSV <- tools::md5sum(fileCSV)
 write.table(md5CSV, file = filemd5, row.names = T, col.names = F, quote = F)
 ```
 
+# Summarizing data
+
 ## Stats on analyses
 
 ```{r eval=TRUE, cache=TRUE}
@@ -326,9 +334,6 @@ ggvenn(
   )
 ```
 
-
-
-
 ## Data visualization
 
 ```{r lexicon, eval = T, echo=F, warning = FALSE, message=FALSE}
@@ -353,26 +358,17 @@ DT::datatable(dat, extensions = 'Buttons', options = list(dom = 'Blfrtip', butto
 
 ``` 
 
-```{r eval = F}
+# References
 
+<div id="refs"></div>
 
+# Appendix 1 {.appendix}
 
+Citations of all R packages used to generate this report. 
 
-
-
-
-
-
-
-#Plot GO graph
-queryNodes <- unique(OUT$GOTerm)
-goGrOUT <- GOstats::GOGraph(queryNodes, GOBPCHILDREN)
-
-nodes <- buildNodeList(goGrOUT)
-nAttrs <- list()
-nAttrs$fillcolor <- ifelse(nodes(goGrOUT) %in% queryNodes, "red", "white")
-names(nAttrs$fillcolor) <- nodes(goGrOUT)
-nAttrs$label <- names(nodes(goGrOUT)); names(nAttrs$label) <- names(nodes(goGrOUT))
-pg <- plot(goGrOUT, nodeAttrs = nAttrs)
-
-```
+```{r generateBibliography, eval = T, results="asis", cache = F, echo=F, warning = FALSE, message=FALSE}
+library("knitcitations")
+cleanbib()
+options("citation_format" = "pandoc")
+read.bibtex(file = "packages.bib")
+``` 

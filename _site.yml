@@ -1,0 +1,7 @@
+name: "ReviewGenesPhenotype"
+output_dir: "."
+navbar:
+  title: "Review of Genes Underpinning a Phenotype"
+  left:
+    - text: "Home"
+      href: index.html
