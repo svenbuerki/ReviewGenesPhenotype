@@ -309,22 +309,46 @@ write.table(md5CSV, file = filemd5, row.names = T, col.names = F, quote = F)
 
 # Summarizing data
 
-## Stats on analyses
+The graph depicting the biological pathways associated to our target phenotype is provided in Figure \@ref(fig:graphpathways).
 
-```{r eval=TRUE, cache=TRUE}
+```{r graphpathways, dependson='graph', echo=FALSE, fig.cap="Biological pathways underpinning stomata phenotype. These are as follows: GO:0010374 - stomatal complex development; GO:0010118 - stomatal movement and GO:0010375 - stomatal complex patterning.", out.width = '100%', fig.pos= "h"}
+#Plot graph
+pg <- plot(goGrkeyword, nodeAttrs = nAttrs)
+```
 
-# Reduce dataset to only one occurrence per gene per pathway per GO term
+## Statistics on analyses
+
+```{r loaddat, eval = TRUE, echo = TRUE, cache = TRUE}
+##~~~
+# Read in csv 
+##~~~
+OUT <- read.csv("Data/Literature_review/Review_GO_genes_stomatal_phenotype.csv") 
+
+##~~
+# Number of occurrences per biological pathway
+##~~
+print(table(OUT$BP_ID))
+
+##~~
+# Reduce dataset to only include one occurrence per gene per pathway per GO term
+##~~
+# Since we have included the Evidence for each TAIR, sometime the same gene can be duplicated since they are confirmed by multiple line of evidence. 
+# --> We MUST first remove duplicates
 redOUT <- OUT[!duplicated(OUT[,c(1,2,4)]),]
+#print stats
+print(table(redOUT$BP_ID))
+```
 
-#How many genes are shared between the pathways?
+## How many genes are shared between pathways?
 
+After removing duplicates, a total of `r length(unique(redOUT$Gene_Name))` genes have been identified. Figure \@ref(fig:venndiag) shows number of genes unique to each biological pathway as well as gene overlap between pathways.
 
-
+```{r venndiag, dependson='loaddat', echo=FALSE, eval=T, cache=T, fig.cap="Venn diagram showing gene overlap between biological pathways.", out.width = '100%', fig.pos= "h"}
 x <- list(
   "GO:0010374" = subset(redOUT$Gene_Name, redOUT$BP_ID == unique(redOUT$BP_ID)[1]), 
   "GO:0010118" = subset(redOUT$Gene_Name, redOUT$BP_ID == unique(redOUT$BP_ID)[2]), 
   "GO:0010375" = subset(redOUT$Gene_Name, redOUT$BP_ID == unique(redOUT$BP_ID)[3])
-  )
+)
 
 library(ggvenn)
 ggvenn(
@@ -332,7 +356,13 @@ ggvenn(
   fill_color = c("#0073C2FF", "#EFC000FF", "#868686FF"),
   stroke_size = 0.5, set_name_size = 4
   )
+
 ```
+
+The genes shared between `r paste(names(x)[c(1,3)], collapse = ", ")` are as follows: `r paste(Reduce(intersect, x[c(1,3)]), collapse = ", ")`.
+
+The genes shared between `r paste(names(x)[c(1,2)], collapse = ", ")` are as follows: `r paste(Reduce(intersect, x[c(1,2)]), collapse = ", ")`.
+
 
 ## Data visualization
 
