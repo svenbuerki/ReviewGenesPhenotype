@@ -214,7 +214,7 @@ pg <- plot(goGrkeyword, nodeAttrs = nAttrs)
 
 ## Extract TAIR and ENTREZ genes associated to target GO terms
 
-This part starts by extracting all TAIR gene IDs associated to GO terms in the updated `keywordBP` object. Then, it finds unique ENTREZ genes IDs, which are used to query the ENTREZ database and fetch additional data (`Evidence`, `Gene_Name`, `Gene_Definition`, `Gene_Aliases`). The whole data are saved in `OUT`. Due to the nature data were retrieved, it is possible that the same gene as multiple entries per GO term, since it might have been backed up by different evidence.
+This part starts by extracting all TAIR gene IDs associated to GO terms in the updated `keywordBP` object. Then, it finds unique ENTREZ genes IDs, which are used to query the ENTREZ database and fetch additional data (`Evidence`, `Gene_Name`, `Gene_Definition`, `Gene_Aliases`). The whole data are saved in `OUT`. Due to the nature data were retrieved, it is possible that the same gene as multiple entries per GO term, since it might have been backed up by different evidence. We are also adding information on the location of the gene (chromosome ID and start and stop positions along the chromosome) as well as providing one reference protein sequence (the protein ID is from the ENTREZ database).
 
 ```{r eval=TRUE, echo=TRUE, message = F, results='hide', cache=TRUE}
 ##~~~
@@ -239,8 +239,8 @@ ENTREZIDlist <- as.list(ENTREZID[mapped_genes])
 SumDat <- lengths(keywordBPGO2TAIR)
 
 #Final output table
-OUT <- matrix(ncol = 9, nrow = sum(SumDat))
-colnames(OUT) <- c("BP_ID","GOTerm", "Term", "TAIR", "Evidence","ENTREZ", "Gene_Name", "Gene_Definition", "Gene_Aliases")
+OUT <- matrix(ncol = 14, nrow = sum(SumDat))
+colnames(OUT) <- c("BP_ID","GOTerm", "Term", "TAIR", "Evidence","ENTREZ", "Gene_Name", "Gene_Definition", "Gene_Aliases", "Chromosome", "Start", "Stop", "RefProtSeq", "ProtSeq")
 OUT <- as.data.frame(OUT)
 OUT$GOTerm <- rep(names(SumDat), as.vector(SumDat))
 OUT$BP_ID <- GrpNodes$BP_ID[match(OUT$GOTerm, GrpNodes$GOTerm)]
@@ -280,11 +280,31 @@ for(i in 1:nrow(OUT)){
   OUT$Gene_Definition[i] <- splitFetch[3]
   #Get Gene Aliases
   OUT$Gene_Aliases[i] <- gsub("Other Aliases: ", "", splitFetch[grep("Other Aliases:", splitFetch)])
+  #Get Chromosome
+  OUT$Chromosome[i] <- gsub("Chromosome: ", "", splitFetch[grep("Chromosome: ", splitFetch)])
+  #Start-Stop
+  tmpStartStop <- gsub(")", "", strsplit(strsplit(splitFetch[grep("Annotation:", splitFetch)], "[(]")[[1]][2], split = "[, ]")[[1]][1])
+  #Start
+  OUT$Start[i] <- strsplit(tmpStartStop, split = "[..]")[[1]][1]
+  #Stop
+  OUT$Stop[i] <- strsplit(tmpStartStop, split = "[..]")[[1]][3]
+  
+  #Protein reference sequence and aa seq
+  Gene2prot <- rentrez::entrez_link(dbfrom='gene', id=as.vector(OUT$ENTREZ)[i], db='protein')
+  
+  #ProtRefSeq
+  OUT$RefProtSeq[i] <- Gene2prot$links$gene_protein_refseq[1]
+  
+  #AAseq
+  tmpAAseq <- strsplit(rentrez::entrez_fetch(db = "protein", id = Gene2prot$links$gene_protein_refseq[1], rettype = 'fasta', retmode = "text"), split = "\n")[[1]]
+  OUT$ProtSeq[i] <- paste(tmpAAseq[2:length(tmpAAseq)], collapse = '')
+  
   #update progress bar
   setTxtProgressBar(pb, i)
 }
 close(pb)
 ```
+
 
 ## Write data out
 
@@ -314,6 +334,11 @@ The graph depicting the biological pathways associated to our target phenotype i
 ```{r graphpathways, dependson='graph', echo=FALSE, fig.cap="Biological pathways underpinning stomata phenotype. These are as follows: GO:0010374 - stomatal complex development; GO:0010118 - stomatal movement and GO:0010375 - stomatal complex patterning.", out.width = '100%', fig.pos= "h"}
 #Plot graph
 pg <- plot(goGrkeyword, nodeAttrs = nAttrs)
+```
+
+The defintions of the GO terms are as follows:
+```{r eval = T, echo = T, dependson='graph', cache = T}
+print(annotate::getGOTerm(names(nAttrs$label)))
 ```
 
 ## Statistics on analyses
@@ -363,6 +388,31 @@ The genes shared between `r paste(names(x)[c(1,3)], collapse = ", ")` are as fol
 
 The genes shared between `r paste(names(x)[c(1,2)], collapse = ", ")` are as follows: `r paste(Reduce(intersect, x[c(1,2)]), collapse = ", ")`.
 
+## Stomatal complex development
+
+```{r}
+stdvp <- subset(redOUT, redOUT$BP_ID == "GO:0010374")
+
+xx <- vector("list", length(unique(as.vector(stdvp$GOTerm))))
+names(xx) <- unique(as.vector(stdvp$GOTerm))
+
+for(i in 1:length(xx)){
+  xx[[i]] <- subset(stdvp$Gene_Name, stdvp$GOTerm == names(xx)[i])
+}
+
+
+library(ggvenn)
+ggvenn(
+  xx[c(2,8,10,1)], 
+  stroke_size = 0.5, set_name_size = 2
+  )
+
+pivTab <- table(as.vector(stdvp$GOTerm), as.vector(stdvp$Gene_Name))
+
+```
+
+
+
 
 ## Data visualization
 
@@ -387,6 +437,38 @@ DT::datatable(dat, extensions = 'Buttons', options = list(dom = 'Blfrtip', butto
   DT::formatStyle('Term', fontWeight = 'bold')
 
 ``` 
+
+## Gene by GO term
+
+```{r}
+##~~~
+# Read in csv 
+##~~~
+OUT <- read.csv("Data/Literature_review/Review_GO_genes_stomatal_phenotype.csv") 
+
+##~~
+# Number of occurrences per biological pathway
+##~~
+print(table(OUT$BP_ID))
+
+##~~
+# Reduce dataset to only include one occurrence per gene per pathway per GO term
+##~~
+# Since we have included the Evidence for each TAIR, sometime the same gene can be duplicated since they are confirmed by multiple line of evidence. 
+# --> We MUST first remove duplicates
+redOUT <- OUT[!duplicated(OUT[,c(1,2,4)]),]
+
+
+#Create a pivot table of genes by GO term
+GeneByGOterm <- table(redOUT$ENTREZ, redOUT$GOTerm)
+GeneByGOterm <- as.data.frame.matrix(GeneByGOterm)
+
+#Add variables
+ToSearch <- match(rownames(GeneByGOterm), redOUT$ENTREZ)
+# 
+GeneByGOterm <- cbind(redOUT[ToSearch,c(6:9)], GeneByGOterm)
+```
+
 
 # References
 
