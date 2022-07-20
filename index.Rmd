@@ -454,12 +454,12 @@ anno_file_1 = "Data/Chromosome_data/annotation.txt"
 chromoMap::chromoMap(chr_file_1,anno_file_1,
           data_based_color_map = T,
           data_type = "categorical", chr.2D.plot = T, #plot_filter = list(c("col","byCategory")),
-          left_margin = 200, canvas_height = 1200, canvas_width = 1000, export.options = T
+          left_margin = 100, canvas_height = 600, canvas_width = 1100, export.options = T
           #ch2D.colors = c("orange","yellow", "blue", "green", "black", "red", "grey", "brown", "pink")
 )
 ```
 
-<br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> 
+<br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /><br />  
 
 ## Gene by GO term
 
